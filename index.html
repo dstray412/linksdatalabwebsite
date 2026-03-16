@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LinksData Lab – Golf Analytics &amp; Player Intelligence</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page:        #000000;
+      --bg-card:        #0a1a0a;
+      --bg-secondary:   #061006;
+      --bg-hover:       #0f2a0f;
+      --text:           #F5F0E8;
+      --text-sec:       rgba(245,240,232,0.5);
+      --text-acc:       #00FF33;
+      --border:         rgba(0,200,50,0.15);
+      --border-s:       rgba(0,200,50,0.3);
+      --hdr-bg:         #0a1a0a;
+      --hdr-sort:       #0f2a0f;
+      --row-even:       #000000;
+      --row-odd:        #040d04;
+      --row-num:        #0a1a0a;
+      --hover-txt:      #00FF33;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg-page);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      line-height: 1.4;
+      min-height: 100vh;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    /* ── SCORE TICKER ─────────────────────────────────────────── */
+    .ticker-wrap {
+      background: #000000;
+      border-bottom: 1px solid var(--border-s);
+      height: 28px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+    }
+    .ticker-track {
+      display: flex;
+      animation: ticker 60s linear infinite;
+      width: max-content;
+    }
+    .ticker-track:hover { animation-play-state: paused; }
+    @keyframes ticker {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .game-chip {
+      display: inline-flex;
+      align-items: center;
+      padding: 0 14px;
+      gap: 5px;
+      border-right: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 500;
+      height: 28px;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-family: 'DM Mono', monospace;
+    }
+    .game-chip:hover { background: rgba(201,168,76,.05); }
+    .g-score { color: #C9A84C; font-weight: 600; }
+    .g-sep   { color: rgba(42,122,90,0.4); }
+    .g-per   { font-size: 10px; font-weight: 400; margin-left: 2px; font-family: 'DM Sans', sans-serif; }
+    .live    { color: #4ade80; }
+    .ot      { color: #C9A84C; }
+    .final   { color: rgba(245,240,232,0.35); }
+
+    /* ── NAVIGATION ───────────────────────────────────────────── */
+    .nav {
+      background: #0a150e;
+      border-bottom: 1px solid var(--border-s);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      height: 44px;
+      gap: 1px;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      margin-right: 10px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .nav-logo img {
+      height: 30px;
+      width: auto;
+      object-fit: contain;
+    }
+    .nav-link {
+      padding: 0 9px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+      font-weight: 400;
+      color: rgba(245,240,232,0.5);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      white-space: nowrap;
+      letter-spacing: 0.01em;
+    }
+    .nav-link:hover, .nav-link.active { color: var(--text); border-color: #C9A84C; }
+    .nav-cta {
+      background: #2D5A3D;
+      border: 1px solid rgba(201,168,76,0.35);
+      color: #C9A84C;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 5px 11px;
+      border-radius: 4px;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.2s, transform 0.1s;
+      letter-spacing: 0.02em;
+    }
+    .nav-cta:hover   { background: #3a7350; }
+    .nav-cta:active  { transform: scale(0.97); }
+
+    /* ── LAYOUT ───────────────────────────────────────────────── */
+    .page { max-width: 1460px; margin: 0 auto; padding: 10px; }
+
+    /* ── CARD ─────────────────────────────────────────────────── */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .card-head {
+      background: var(--hdr-bg);
+      padding: 7px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-s);
+      gap: 8px;
+    }
+    .card-title {
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-acc);
+      white-space: nowrap;
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── TABS ─────────────────────────────────────────────────── */
+    .tabs { display: flex; gap: 2px; flex-wrap: nowrap; }
+    .tab {
+      padding: 2px 9px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--text-sec);
+      border-radius: 3px;
+      cursor: pointer;
+      border: none;
+      background: none;
+      transition: background 0.15s, color 0.15s;
+      white-space: nowrap;
+    }
+    .tab:hover           { background: var(--bg-hover); color: var(--text); }
+    .tab.active          { background: rgba(201,168,76,0.15); color: #C9A84C; }
+    .tab:focus-visible   { outline: 2px solid #C9A84C; outline-offset: 1px; }
+
+    /* ── TABLE ────────────────────────────────────────────────── */
+    .dt { width: 100%; border-collapse: collapse; }
+    .dt th {
+      background: var(--hdr-bg);
+      color: var(--text-sec);
+      font-size: 10px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 5px 6px;
+      text-align: center;
+      border-bottom: 1px solid var(--border-s);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+      font-family: 'DM Mono', monospace;
+    }
+    .dt th:hover, .dt th.sorted { background: var(--hdr-sort); color: #C9A84C; }
+    .dt th.lft { text-align: left; }
+    .dt td {
+      padding: 4px 6px;
+      font-size: 11px;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.1s, color 0.1s;
+      color: var(--text);
+    }
+    .dt tr:nth-child(even) td { background: var(--row-even); }
+    .dt tr:nth-child(odd)  td { background: var(--row-odd); }
+    .dt tr:hover td { background: var(--bg-hover); color: var(--hover-txt); }
+    .dt td.rk { background: var(--row-num) !important; color: var(--text-sec); font-size: 10px; width: 22px; font-family: 'DM Mono', monospace; }
+    .dt td.lft { text-align: left; }
+    .dt td.bold { font-weight: 500; color: var(--text); }
+    .dt td.acc  { color: #C9A84C; font-weight: 600; font-family: 'DM Mono', monospace; }
+    .dt td.grn  { color: #4ade80; font-family: 'DM Mono', monospace; }
+    .dt td.red  { color: #f87171; font-family: 'DM Mono', monospace; }
+    .dt td.mono { font-family: 'DM Mono', monospace; }
+
+    /* ── CIRCULAR GAUGE ───────────────────────────────────────── */
+    .gauge-wrap { position: relative; width: 68px; height: 68px; flex-shrink: 0; }
+    .gauge-wrap svg { width: 68px; height: 68px; transform: rotate(-90deg); }
+    .gauge-val {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 19px; font-weight: 500; color: var(--text);
+      font-family: 'DM Mono', monospace;
+    }
+
+    /* ── BAR CHART ────────────────────────────────────────────── */
+    .bar-row {
+      display: flex; align-items: center; gap: 8px;
+      padding: 3px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .bar-row:last-child { border-bottom: none; }
+    .bar-label { width: 150px; font-size: 11px; flex-shrink: 0; }
+    .bar-bg { flex: 1; height: 13px; background: rgba(42,122,90,0.12); border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 3px; }
+    .bar-val { width: 40px; font-size: 11px; font-weight: 600; text-align: right; flex-shrink: 0; font-family: 'DM Mono', monospace; }
+
+    /* ── ODDS BAR ─────────────────────────────────────────────── */
+    .odds-bg { height: 5px; background: var(--border-s); border-radius: 3px; overflow: hidden; width: 54px; }
+    .odds-fill { height: 100%; background: linear-gradient(90deg, #2A7A5A, #C9A84C); border-radius: 3px; }
+
+    /* ── SCROLLBAR ────────────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg-page); }
+    ::-webkit-scrollbar-thumb { background: var(--border-s); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: #2A7A5A; }
+  </style>
+  <!-- Three.js via ES module importmap -->
+</head>
+<body>
+
+<div id="contentWrapper">
+
+<!-- ── SCORE TICKER ─────────────────────────────────────────────── -->
+<div class="ticker-wrap">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<!-- ── NAVIGATION ───────────────────────────────────────────────── -->
+<nav class="nav">
+  <span class="nav-logo">
+    <img src="ChatGPT Image Feb 20, 2026, 11_17_08 PM.png" alt="LinksData Lab">
+  </span>
+  <a class="nav-link active" href="#">Home</a>
+  <a class="nav-link" href="#">Tour</a>
+  <a class="nav-link" href="#">Players</a>
+  <a class="nav-link" href="#">Courses</a>
+  <a class="nav-link" href="#">Stats</a>
+  <a class="nav-link" href="#">Strokes Gained</a>
+  <a class="nav-link" href="#">Dashboards</a>
+  <a class="nav-link" href="#">Leaderboard</a>
+  <a class="nav-link" href="#">Fantasy</a>
+  <a class="nav-link" href="#">More ▾</a>
+  <div style="flex:1"></div>
+  <button class="nav-cta">SG: Total Leaders →</button>
+</nav>
+
+<!-- ── PAGE ─────────────────────────────────────────────────────── -->
+<main class="page">
+
+  <!-- WORDMARK -->
+  <div style="text-align:center;padding:28px 0 20px;position:relative">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(201,168,76,.06) 0%,transparent 70%);pointer-events:none"></div>
+    <h1 style="font-family:Georgia,serif;font-size:clamp(28px,4vw,48px);font-weight:700;letter-spacing:-0.03em;line-height:1;color:#F5F0E8;position:relative;z-index:1">
+      LinksData <span style="color:#C9A84C">Lab</span>
+    </h1>
+    <div style="width:48px;height:1px;background:linear-gradient(to right,transparent,rgba(201,168,76,.5),transparent);margin:10px auto 0"></div>
+  </div>
+
+  <!-- ROW 1: Player Card + FedEx Standings -->
+  <div style="display:grid;grid-template-columns:330px 1fr;gap:10px;margin-bottom:10px">
+
+    <!-- PLAYER CARD -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Player Intelligence</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button style="background:none;border:none;color:var(--text-sec);cursor:pointer;font-size:13px;padding:0;line-height:1;transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-sec)'">◀</button>
+          <span style="font-size:10px;font-weight:500;color:var(--text);letter-spacing:.06em;font-family:'DM Mono',monospace">SCOTTIE SCHEFFLER</span>
+          <button style="background:none;border:none;color:var(--text-sec);cursor:pointer;font-size:13px;padding:0;line-height:1;transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-sec)'">▶</button>
+        </div>
+      </div>
+
+      <!-- Card body -->
+      <div style="position:relative;background:linear-gradient(140deg,#0a150e 0%,#1e4a2e 60%,#0a150e 100%);padding:12px;display:flex;gap:10px;overflow:hidden">
+        <!-- Glow -->
+        <div style="position:absolute;inset:0;background:radial-gradient(circle at 65% 40%,rgba(201,168,76,.12) 0%,transparent 65%);pointer-events:none"></div>
+
+        <!-- Photo -->
+        <div style="flex-shrink:0;z-index:1">
+          <img src="https://placehold.co/90x115/1A3A2A/C9A84C?text=SS" alt="Scottie Scheffler"
+               style="width:90px;height:115px;object-fit:cover;border-radius:6px;border:2px solid rgba(201,168,76,.35);display:block">
+          <div style="margin-top:5px;display:flex;gap:3px;justify-content:center">
+            <span style="background:#2D5A3D;color:#C9A84C;font-size:8px;font-weight:500;padding:1px 5px;border-radius:2px;letter-spacing:.04em;font-family:'DM Mono',monospace">USA</span>
+            <span style="background:rgba(42,122,90,.15);color:var(--text-sec);font-size:8px;font-weight:400;padding:1px 5px;border-radius:2px;font-family:'DM Mono',monospace">#1 WR</span>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div style="flex:1;min-width:0;z-index:1">
+          <div style="line-height:1;margin-bottom:8px">
+            <div style="font-size:17px;font-weight:700;letter-spacing:-.02em;color:var(--text);font-family:Georgia,serif">SCOTTIE</div>
+            <div style="font-size:17px;font-weight:700;letter-spacing:-.02em;color:var(--text);font-family:Georgia,serif">SCHEFFLER</div>
+            <div style="font-size:9px;color:var(--text-sec);margin-top:2px">PGA Tour · World No. 1</div>
+          </div>
+
+          <!-- Gauge row -->
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <div class="gauge-wrap">
+              <svg viewBox="0 0 68 68">
+                <circle cx="34" cy="34" r="28" fill="none" stroke="rgba(42,122,90,.2)" stroke-width="6"/>
+                <circle cx="34" cy="34" r="28" fill="none" stroke="#C9A84C" stroke-width="6"
+                        stroke-dasharray="175.9" stroke-dashoffset="7" stroke-linecap="round"/>
+              </svg>
+              <div class="gauge-val">99</div>
+            </div>
+            <div>
+              <div style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace">SG: Total</div>
+              <div style="font-size:24px;font-weight:500;color:var(--text);line-height:1;font-family:'DM Mono',monospace">+4.81</div>
+              <div style="font-size:9px;color:#4ade80;font-weight:500;font-family:'DM Mono',monospace">+2.3 vs field</div>
+              <div style="font-size:9px;color:var(--text-sec);margin-top:2px">99th Percentile</div>
+            </div>
+          </div>
+
+          <!-- Stat grid -->
+          <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:8px">
+            <div style="text-align:center;background:rgba(42,122,90,.1);border-radius:3px;padding:3px 1px">
+              <div style="font-size:8px;color:var(--text-sec);text-transform:uppercase;font-family:'DM Mono',monospace">EVT</div>
+              <div style="font-size:13px;font-weight:500;color:var(--text);font-family:'DM Mono',monospace">18</div>
+            </div>
+            <div style="text-align:center;background:rgba(42,122,90,.1);border-radius:3px;padding:3px 1px">
+              <div style="font-size:8px;color:var(--text-sec);text-transform:uppercase;font-family:'DM Mono',monospace">W</div>
+              <div style="font-size:13px;font-weight:500;color:var(--text);font-family:'DM Mono',monospace">5</div>
+            </div>
+            <div style="text-align:center;background:rgba(42,122,90,.1);border-radius:3px;padding:3px 1px">
+              <div style="font-size:8px;color:var(--text-sec);text-transform:uppercase;font-family:'DM Mono',monospace">T10</div>
+              <div style="font-size:13px;font-weight:500;color:var(--text);font-family:'DM Mono',monospace">12</div>
+            </div>
+            <div style="text-align:center;background:rgba(42,122,90,.1);border-radius:3px;padding:3px 1px">
+              <div style="font-size:8px;color:var(--text-sec);text-transform:uppercase;font-family:'DM Mono',monospace">CUT</div>
+              <div style="font-size:13px;font-weight:500;color:var(--text);font-family:'DM Mono',monospace">17</div>
+            </div>
+            <div style="text-align:center;background:rgba(42,122,90,.1);border-radius:3px;padding:3px 1px">
+              <div style="font-size:8px;color:var(--text-sec);text-transform:uppercase;font-family:'DM Mono',monospace">SCR</div>
+              <div style="font-size:13px;font-weight:500;color:#C9A84C;font-family:'DM Mono',monospace">69.4</div>
+            </div>
+          </div>
+
+          <!-- Stat bars -->
+          <div style="display:flex;flex-direction:column;gap:4px">
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--text-sec);margin-bottom:2px;font-family:'DM Mono',monospace"><span>SG: APR</span><span>+2.14</span></div>
+              <div style="background:rgba(42,122,90,.12);height:3px;border-radius:2px"><div style="width:94%;height:100%;background:linear-gradient(90deg,#2A7A5A,#C9A84C);border-radius:2px"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--text-sec);margin-bottom:2px;font-family:'DM Mono',monospace"><span>SG: PUTT</span><span>+1.28</span></div>
+              <div style="background:rgba(42,122,90,.12);height:3px;border-radius:2px"><div style="width:78%;height:100%;background:linear-gradient(90deg,#2A7A5A,#C9A84C);border-radius:2px"></div></div>
+            </div>
+            <div>
+              <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--text-sec);margin-bottom:2px;font-family:'DM Mono',monospace"><span>SG: OTT</span><span>+0.91</span></div>
+              <div style="background:rgba(42,122,90,.12);height:3px;border-radius:2px"><div style="width:65%;height:100%;background:linear-gradient(90deg,#2A7A5A,#C9A84C);border-radius:2px"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card footer -->
+      <div style="background:rgba(42,122,90,.1);border-top:1px solid var(--border-s);padding:5px 10px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:8px;font-weight:500;letter-spacing:.1em;color:var(--text-sec);text-transform:uppercase;font-family:'DM Mono',monospace">Fantasy Golf</span>
+        <div style="display:flex;gap:6px;font-size:9px;color:var(--text-sec)">
+          <span style="cursor:pointer;transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Player Cards</span>
+          <span>·</span>
+          <span style="cursor:pointer;transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Round Stats</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- FEDEX CUP STANDINGS -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">FedEx Cup Standings &amp; Points</span>
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab(this)">FedEx Cup</button>
+          <button class="tab" onclick="switchTab(this)">Americas</button>
+          <button class="tab" onclick="switchTab(this)">Europe</button>
+          <button class="tab" onclick="switchTab(this)">Asia Pac</button>
+          <button class="tab" onclick="switchTab(this)">Korn Ferry</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="dt">
+          <thead>
+            <tr>
+              <th class="lft" style="width:22px">RK</th>
+              <th class="lft" style="min-width:160px">PLAYER</th>
+              <th>CTY</th>
+              <th>EVT</th>
+              <th>W</th>
+              <th>T5</th>
+              <th>T10</th>
+              <th class="sorted">FEDEX PTS</th>
+              <th>CUTS</th>
+              <th>AVG SCR</th>
+              <th>SG TOT</th>
+              <th>SG APR</th>
+              <th>SG PUTT</th>
+              <th>SG OTT</th>
+              <th>EARNINGS</th>
+              <th>WIN%</th>
+            </tr>
+          </thead>
+          <tbody id="standingsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Strokes Gained Leaderboard + Field Builder -->
+  <div style="display:grid;grid-template-columns:1fr 370px;gap:10px;margin-bottom:10px">
+
+    <!-- STROKES GAINED LEADERBOARD -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Tour Stats Leaderboard</span>
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab(this)">SG: Total</button>
+          <button class="tab" onclick="switchTab(this)">SG: APR</button>
+          <button class="tab" onclick="switchTab(this)">SG: Putting</button>
+          <button class="tab" onclick="switchTab(this)">SG: OTT</button>
+          <button class="tab" onclick="switchTab(this)">Scoring Avg</button>
+          <button class="tab" onclick="switchTab(this)">Driving</button>
+        </div>
+      </div>
+      <!-- Filter bar -->
+      <div style="background:var(--bg-secondary);padding:4px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);flex-wrap:wrap">
+        <span style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace">Filter:</span>
+        <div class="tabs">
+          <button class="tab active" style="font-size:9px" onclick="switchTab(this)">All</button>
+          <button class="tab" style="font-size:9px" onclick="switchTab(this)">PGA Tour</button>
+          <button class="tab" style="font-size:9px" onclick="switchTab(this)">DP World</button>
+          <button class="tab" style="font-size:9px" onclick="switchTab(this)">LIV</button>
+          <button class="tab" style="font-size:9px" onclick="switchTab(this)">Rookie</button>
+          <button class="tab" style="font-size:9px" onclick="switchTab(this)">USA</button>
+        </div>
+        <div style="flex:1"></div>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Min Rds:</span>
+        <input type="number" value="20" min="1" max="100"
+               style="width:38px;background:var(--bg-hover);border:1px solid var(--border-s);color:var(--text);font-size:10px;padding:2px 4px;border-radius:3px;font-family:'DM Mono',monospace">
+      </div>
+      <div style="overflow-x:auto">
+        <table class="dt">
+          <thead>
+            <tr>
+              <th class="lft">RK</th>
+              <th class="lft" style="min-width:150px">PLAYER</th>
+              <th>CTY</th>
+              <th>RDS</th>
+              <th>EVT</th>
+              <th>W</th>
+              <th class="sorted">SG: TOT</th>
+              <th>SG: APR</th>
+              <th>SG: ARG</th>
+              <th>SG: PUTT</th>
+              <th>SG: OTT</th>
+              <th>AVG SCR</th>
+              <th>GIR%</th>
+              <th>PUTTS</th>
+              <th>DRIVE</th>
+              <th>EARNINGS</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- FIELD BUILDER -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Field Builder</span>
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab(this)">The Masters</button>
+          <button class="tab" onclick="switchTab(this)">The Players</button>
+          <button class="tab" onclick="switchTab(this)">US Open</button>
+          <button class="tab" onclick="switchTab(this)">The Open</button>
+        </div>
+      </div>
+      <div style="padding:12px;display:flex;gap:12px;align-items:flex-start">
+        <!-- Player hero -->
+        <div style="flex-shrink:0;text-align:center">
+          <div style="position:relative;display:inline-block">
+            <img src="https://placehold.co/110x140/1A3A2A/C9A84C?text=McIlroy" alt="Rory McIlroy"
+                 style="width:110px;height:140px;object-fit:cover;border-radius:6px;border:2px solid rgba(201,168,76,.3);display:block">
+            <div style="position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);background:#0D1A14;border:2px solid #C9A84C;border-radius:50%;width:42px;height:42px;display:flex;align-items:center;justify-content:center">
+              <span style="font-size:13px;font-weight:500;color:#C9A84C;font-family:'DM Mono',monospace">4.2</span>
+            </div>
+          </div>
+          <div style="margin-top:20px;font-size:13px;font-weight:500;color:var(--text)">Rory McIlroy</div>
+          <div style="font-size:9px;color:var(--text-sec)">NIR · World No. 2</div>
+        </div>
+        <!-- Field list -->
+        <div style="flex:1;min-width:0">
+          <div style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;font-family:'DM Mono',monospace">Top Picks</div>
+          <div id="rosterList"></div>
+        </div>
+      </div>
+      <div style="background:var(--bg-secondary);border-top:1px solid var(--border);padding:7px 10px;display:flex;gap:6px;justify-content:center">
+        <button style="background:#2D5A3D;border:1px solid rgba(201,168,76,.35);color:#C9A84C;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:500;padding:4px 12px;border-radius:4px;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#3a7350'" onmouseout="this.style.background='#2D5A3D'">Build Lineup</button>
+        <button style="background:none;border:1px solid var(--border);color:var(--text-sec);font-family:'DM Sans',sans-serif;font-size:10px;font-weight:400;padding:4px 12px;border-radius:4px;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--border-s)'" onmouseout="this.style.borderColor='var(--border)'">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROMO BANNER -->
+  <div style="background:linear-gradient(135deg,#0a150e 0%,#1e4a2e 100%);border:1px solid var(--border-s);border-radius:6px;padding:12px 18px;margin-bottom:10px;display:flex;align-items:center;gap:16px;overflow:hidden;position:relative">
+    <div style="position:absolute;inset:0;background:radial-gradient(circle at 20% 50%,rgba(201,168,76,.07) 0%,transparent 60%);pointer-events:none"></div>
+    <img src="ChatGPT Image Feb 20, 2026, 11_17_08 PM.png" alt="LinksData Lab" style="width:56px;height:56px;object-fit:contain;flex-shrink:0;position:relative;z-index:1;opacity:.9">
+    <div style="flex:1;position:relative;z-index:1">
+      <div style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px;font-family:'DM Mono',monospace">LinksData Lab · Community</div>
+      <div style="font-size:17px;font-weight:700;color:var(--text);line-height:1.2;font-family:Georgia,serif">The Science Behind the <span style="color:#C9A84C">Swing.</span></div>
+      <div style="font-size:10px;color:var(--text-sec);margin-top:3px">Advanced strokes-gained dashboards and tour analytics — built for serious golf fans.</div>
+    </div>
+    <div style="display:flex;gap:6px;flex-shrink:0;position:relative;z-index:1">
+      <button style="background:#C9A84C;color:#0D1A14;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;padding:7px 14px;border-radius:5px;border:none;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">Explore Data</button>
+      <button style="background:none;border:1px solid var(--border-s);color:var(--text-sec);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:400;padding:7px 14px;border-radius:5px;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='#C9A84C'" onmouseout="this.style.borderColor='var(--border-s)'">Join Community</button>
+    </div>
+  </div>
+
+  <!-- ROW 3: Player Profile + Strokes Gained Dashboard -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+
+    <!-- PLAYER PROFILE -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Player Profile</span>
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab(this)">Featured</button>
+          <button class="tab" onclick="switchTab(this)">Rookies</button>
+          <button class="tab" onclick="switchTab(this)">Contenders</button>
+          <button class="tab" onclick="switchTab(this)">Veterans</button>
+        </div>
+      </div>
+      <div style="display:flex;min-height:220px">
+        <!-- Photo -->
+        <div style="width:130px;flex-shrink:0;position:relative;overflow:hidden">
+          <img src="https://placehold.co/130x240/0a150e/C9A84C?text=Schauffele" alt="Xander Schauffele"
+               style="width:130px;height:240px;object-fit:cover;filter:grayscale(30%);display:block">
+          <div style="position:absolute;inset:0;background:linear-gradient(to right,transparent 40%,var(--bg-card) 100%)"></div>
+          <div style="position:absolute;bottom:8px;left:8px;font-size:8px;color:var(--text-sec);font-family:'DM Mono',monospace">USA · Olympic Gold</div>
+        </div>
+        <!-- Text -->
+        <div style="flex:1;padding:12px 14px;overflow-y:auto;max-height:240px">
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.01em;color:var(--text);line-height:1;margin-bottom:2px;font-family:Georgia,serif">XANDER SCHAUFFELE</div>
+          <div style="font-size:9px;color:#C9A84C;text-transform:uppercase;letter-spacing:.09em;margin-bottom:10px;font-family:'DM Mono',monospace">PGA Tour · #3 World Ranking</div>
+          <p style="font-size:11px;color:var(--text-sec);line-height:1.7;font-family:'DM Sans',sans-serif">
+            One of the most complete ball-strikers in the modern game. Schauffele's strokes-gained approach profile is among the elite — combining tight dispersion off the tee with a surgical iron game that consistently converts birdie looks at a rate few players can match. His 2024 season marked a coming-of-age moment: a breakthrough major win backed by a statistical profile that had long suggested he was a major champion in waiting.
+          </p>
+          <p style="font-size:11px;color:var(--text-sec);line-height:1.7;font-family:'DM Sans',sans-serif;margin-top:8px">
+            Around the green, Schauffele demonstrates elite touch and trajectory control. His flat-stick performance has improved meaningfully year-over-year. The combination of long-game dominance and a sharpened short game creates a player who can win on any course setup.
+          </p>
+          <div style="margin-top:10px;display:flex;gap:6px">
+            <button style="background:#2D5A3D;border:1px solid rgba(201,168,76,.3);color:#C9A84C;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;padding:3px 9px;border-radius:3px;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#3a7350'" onmouseout="this.style.background='#2D5A3D'">View Profile</button>
+            <button style="background:none;border:1px solid var(--border);color:var(--text-sec);font-family:'DM Sans',sans-serif;font-size:9px;font-weight:400;padding:3px 9px;border-radius:3px;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--border-s)'" onmouseout="this.style.borderColor='var(--border)'">Next ▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STROKES GAINED DASHBOARD -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Strokes Gained Dashboard</span>
+        <div class="tabs">
+          <button class="tab active" onclick="switchTab(this)">SG: Total</button>
+          <button class="tab" onclick="switchTab(this)">Approach</button>
+          <button class="tab" onclick="switchTab(this)">Putting</button>
+        </div>
+      </div>
+      <div style="background:var(--bg-secondary);padding:4px 10px;border-bottom:1px solid var(--border);display:flex;gap:4px;align-items:center">
+        <span style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace">Metric:</span>
+        <div class="tabs">
+          <button class="tab active" style="font-size:9px" onclick="switchTab(this)">2025–26</button>
+          <button class="tab" style="font-size:9px" onclick="switchTab(this)">L24 Rnds</button>
+          <button class="tab" style="font-size:9px" onclick="switchTab(this)">Majors</button>
+          <button class="tab" style="font-size:9px" onclick="switchTab(this)">Playoff</button>
+          <button class="tab" style="font-size:9px" onclick="switchTab(this)">Career</button>
+        </div>
+      </div>
+      <div style="padding:10px 12px" id="goalieChart"></div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div style="text-align:center;padding:14px 0;color:var(--text-sec);font-size:9px;border-top:1px solid var(--border)">
+    <div style="margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px">
+      <img src="ChatGPT Image Feb 20, 2026, 11_17_08 PM.png" alt="LinksData Lab" style="height:18px;width:auto;opacity:.7">
+    </div>
+    <div style="margin-bottom:4px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px">
+      <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Home</a>
+      <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Players</a>
+      <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Courses</a>
+      <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Standings</a>
+      <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Stats</a>
+      <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Strokes Gained</a>
+      <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Privacy Policy</a>
+      <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Terms of Use</a>
+    </div>
+    <div>© 2026 LinksData Lab · The Science Behind the Swing. · Tour data for informational purposes.</div>
+  </div>
+
+</main>
+
+</div><!-- /#contentWrapper -->
+
+<script>
+// ── DATA ────────────────────────────────────────────────────────────
+
+const GAMES = [
+  {away:'Scheffler',  as:-18, home:'McIlroy',    hs:-16, per:'R4 · Live',       cls:'live'},
+  {away:'Schauffele', as:-14, home:'Clark',       hs:-13, per:'R4 · Final',      cls:'final'},
+  {away:'Fleetwood',  as:-12, home:'Hovland',     hs:-11, per:'R3 · Final',      cls:'final'},
+  {away:'Thomas',     as:-10, home:'Spieth',      hs:-9,  per:'R4 · Live',       cls:'live'},
+  {away:'Burns',      as:-15, home:'Homa',        hs:-14, per:'R4 · Final',      cls:'final'},
+  {away:'Kim',        as:-13, home:'Fitzpatrick', hs:-12, per:'R3 · Final',      cls:'final'},
+  {away:'DeChambeau', as:-17, home:'Cantlay',     hs:-15, per:'R4 · Live',       cls:'live'},
+  {away:'Finau',      as:-11, home:'Rose',        hs:-11, per:'R4 · Playoff',    cls:'ot'},
+  {away:'Rahm',       as:-16, home:'Morikawa',    hs:-14, per:'R4 · Final',      cls:'final'},
+  {away:'Reavie',     as:-9,  home:'Kirk',        hs:-8,  per:'R4 · Live',       cls:'live'},
+  {away:'Straka',     as:-14, home:'Niemann',     hs:-13, per:'R4 · Final',      cls:'final'},
+  {away:'Lowry',      as:-12, home:'McCarthy',    hs:-10, per:'R4 · Live',       cls:'live'},
+];
+
+const STANDINGS = [
+  {rk:1, name:'Scottie Scheffler',   cty:'USA',evt:18,w:5, t5:9, t10:12,pts:2840,cuts:17,avg:'69.4',sgt:'+4.81',sga:'+2.14',sgp:'+1.28',sgo:'+0.91',earn:'$11.2M',win:28.4},
+  {rk:2, name:'Rory McIlroy',        cty:'NIR',evt:17,w:3, t5:8, t10:11,pts:2510,cuts:16,avg:'69.8',sgt:'+4.12',sga:'+1.88',sgp:'+1.41',sgo:'+0.78',earn:'$9.4M', win:21.2},
+  {rk:3, name:'Xander Schauffele',   cty:'USA',evt:16,w:2, t5:7, t10:10,pts:2240,cuts:15,avg:'70.1',sgt:'+3.88',sga:'+1.92',sgp:'+1.02',sgo:'+0.84',earn:'$8.6M', win:18.8},
+  {rk:4, name:'Collin Morikawa',     cty:'USA',evt:17,w:2, t5:6, t10:9, pts:2080,cuts:16,avg:'70.4',sgt:'+3.41',sga:'+2.24',sgp:'+0.61',sgo:'+0.52',earn:'$7.8M', win:15.4},
+  {rk:5, name:'Viktor Hovland',      cty:'NOR',evt:17,w:1, t5:7, t10:9, pts:1960,cuts:15,avg:'70.6',sgt:'+3.18',sga:'+1.74',sgp:'+0.88',sgo:'+0.52',earn:'$7.2M', win:12.8},
+  {rk:6, name:'Patrick Cantlay',     cty:'USA',evt:16,w:1, t5:5, t10:8, pts:1840,cuts:15,avg:'70.8',sgt:'+2.94',sga:'+1.48',sgp:'+1.12',sgo:'+0.28',earn:'$6.4M', win:10.2},
+  {rk:7, name:'Sam Burns',           cty:'USA',evt:18,w:2, t5:6, t10:8, pts:1780,cuts:16,avg:'70.9',sgt:'+2.82',sga:'+1.34',sgp:'+0.94',sgo:'+0.52',earn:'$6.1M', win:9.8},
+  {rk:8, name:'Jon Rahm',            cty:'ESP',evt:14,w:1, t5:4, t10:7, pts:1720,cuts:13,avg:'70.7',sgt:'+2.74',sga:'+1.58',sgp:'+0.68',sgo:'+0.44',earn:'$5.8M', win:9.1},
+  {rk:9, name:'Tommy Fleetwood',     cty:'ENG',evt:16,w:1, t5:4, t10:7, pts:1640,cuts:14,avg:'71.0',sgt:'+2.61',sga:'+1.42',sgp:'+0.72',sgo:'+0.44',earn:'$5.4M', win:7.8},
+  {rk:10,name:'Wyndham Clark',       cty:'USA',evt:17,w:1, t5:5, t10:7, pts:1580,cuts:15,avg:'71.2',sgt:'+2.48',sga:'+1.18',sgp:'+0.92',sgo:'+0.38',earn:'$5.1M', win:7.2},
+  {rk:11,name:'Jordan Spieth',       cty:'USA',evt:17,w:1, t5:4, t10:6, pts:1520,cuts:15,avg:'71.1',sgt:'+2.34',sga:'+0.98',sgp:'+1.04',sgo:'+0.28',earn:'$4.8M', win:6.4},
+  {rk:12,name:'Justin Thomas',       cty:'USA',evt:17,w:1, t5:3, t10:6, pts:1480,cuts:14,avg:'71.3',sgt:'+2.18',sga:'+1.28',sgp:'+0.64',sgo:'+0.24',earn:'$4.6M', win:5.8},
+  {rk:13,name:'Keegan Bradley',      cty:'USA',evt:18,w:1, t5:3, t10:5, pts:1380,cuts:15,avg:'71.5',sgt:'+1.94',sga:'+1.08',sgp:'+0.58',sgo:'+0.28',earn:'$4.1M', win:4.8},
+  {rk:14,name:'Tom Kim',             cty:'KOR',evt:16,w:1, t5:3, t10:5, pts:1340,cuts:14,avg:'71.4',sgt:'+1.88',sga:'+1.14',sgp:'+0.48',sgo:'+0.24',earn:'$3.9M', win:4.4},
+  {rk:15,name:'Tony Finau',          cty:'USA',evt:17,w:0, t5:4, t10:6, pts:1280,cuts:15,avg:'71.6',sgt:'+1.74',sga:'+0.88',sgp:'+0.62',sgo:'+0.22',earn:'$3.6M', win:3.8},
+  {rk:16,name:'Matt Fitzpatrick',    cty:'ENG',evt:15,w:0, t5:3, t10:5, pts:1220,cuts:13,avg:'71.7',sgt:'+1.62',sga:'+1.04',sgp:'+0.42',sgo:'+0.14',earn:'$3.4M', win:3.2},
+];
+
+const LEADERS = [
+  {rk:1, name:'Scottie Scheffler',  cty:'USA',rds:62,evt:18,w:5, sgt:'+4.81',sga:'+2.14',sarg:'+0.48',sgp:'+1.28',sgo:'+0.91',avg:'69.4',gir:'75.2',putts:'1.71',drive:'314',earn:'$11.2M'},
+  {rk:2, name:'Rory McIlroy',       cty:'NIR',rds:58,evt:17,w:3, sgt:'+4.12',sga:'+1.88',sarg:'+0.44',sgp:'+1.41',sgo:'+0.78',avg:'69.8',gir:'72.8',putts:'1.69',drive:'321',earn:'$9.4M'},
+  {rk:3, name:'Xander Schauffele',  cty:'USA',rds:55,evt:16,w:2, sgt:'+3.88',sga:'+1.92',sarg:'+0.52',sgp:'+1.02',sgo:'+0.84',avg:'70.1',gir:'71.4',putts:'1.72',drive:'308',earn:'$8.6M'},
+  {rk:4, name:'Collin Morikawa',    cty:'USA',rds:58,evt:17,w:2, sgt:'+3.41',sga:'+2.24',sarg:'+0.38',sgp:'+0.61',sgo:'+0.52',avg:'70.4',gir:'74.1',putts:'1.76',drive:'304',earn:'$7.8M'},
+  {rk:5, name:'Viktor Hovland',     cty:'NOR',rds:57,evt:17,w:1, sgt:'+3.18',sga:'+1.74',sarg:'+0.44',sgp:'+0.88',sgo:'+0.52',avg:'70.6',gir:'70.8',putts:'1.74',drive:'316',earn:'$7.2M'},
+  {rk:6, name:'Patrick Cantlay',    cty:'USA',rds:54,evt:16,w:1, sgt:'+2.94',sga:'+1.48',sarg:'+0.62',sgp:'+1.12',sgo:'+0.28',avg:'70.8',gir:'69.6',putts:'1.70',drive:'299',earn:'$6.4M'},
+  {rk:7, name:'Sam Burns',          cty:'USA',rds:62,evt:18,w:2, sgt:'+2.82',sga:'+1.34',sarg:'+0.48',sgp:'+0.94',sgo:'+0.52',avg:'70.9',gir:'68.8',putts:'1.72',drive:'312',earn:'$6.1M'},
+  {rk:8, name:'Jon Rahm',           cty:'ESP',rds:48,evt:14,w:1, sgt:'+2.74',sga:'+1.58',sarg:'+0.42',sgp:'+0.68',sgo:'+0.44',avg:'70.7',gir:'70.2',putts:'1.75',drive:'310',earn:'$5.8M'},
+  {rk:9, name:'Tommy Fleetwood',    cty:'ENG',rds:54,evt:16,w:1, sgt:'+2.61',sga:'+1.42',sarg:'+0.36',sgp:'+0.72',sgo:'+0.44',avg:'71.0',gir:'69.4',putts:'1.73',drive:'306',earn:'$5.4M'},
+  {rk:10,name:'Wyndham Clark',      cty:'USA',rds:57,evt:17,w:1, sgt:'+2.48',sga:'+1.18',sarg:'+0.58',sgp:'+0.92',sgo:'+0.38',avg:'71.2',gir:'67.8',putts:'1.71',drive:'318',earn:'$5.1M'},
+  {rk:11,name:'Jordan Spieth',      cty:'USA',rds:57,evt:17,w:1, sgt:'+2.34',sga:'+0.98',sarg:'+0.68',sgp:'+1.04',sgo:'+0.28',avg:'71.1',gir:'66.4',putts:'1.70',drive:'295',earn:'$4.8M'},
+  {rk:12,name:'Justin Thomas',      cty:'USA',rds:57,evt:17,w:1, sgt:'+2.18',sga:'+1.28',sarg:'+0.44',sgp:'+0.64',sgo:'+0.24',avg:'71.3',gir:'68.2',putts:'1.75',drive:'302',earn:'$4.6M'},
+  {rk:13,name:'Keegan Bradley',     cty:'USA',rds:62,evt:18,w:1, sgt:'+1.94',sga:'+1.08',sarg:'+0.52',sgp:'+0.58',sgo:'+0.28',avg:'71.5',gir:'67.1',putts:'1.76',drive:'308',earn:'$4.1M'},
+  {rk:14,name:'Tom Kim',            cty:'KOR',rds:54,evt:16,w:1, sgt:'+1.88',sga:'+1.14',sarg:'+0.38',sgp:'+0.48',sgo:'+0.24',avg:'71.4',gir:'66.8',putts:'1.74',drive:'311',earn:'$3.9M'},
+  {rk:15,name:'Tony Finau',         cty:'USA',rds:57,evt:17,w:0, sgt:'+1.74',sga:'+0.88',sarg:'+0.48',sgp:'+0.62',sgo:'+0.22',avg:'71.6',gir:'65.4',putts:'1.73',drive:'322',earn:'$3.6M'},
+];
+
+const ROSTER = [
+  {name:'Scottie Scheffler',  pos:'USA', rtg:'+4.81'},
+  {name:'Collin Morikawa',    pos:'USA', rtg:'+3.41'},
+  {name:'Viktor Hovland',     pos:'NOR', rtg:'+3.18'},
+  {name:'Patrick Cantlay',    pos:'USA', rtg:'+2.94'},
+  {name:'Sam Burns',          pos:'USA', rtg:'+2.82'},
+  {name:'Tommy Fleetwood',    pos:'ENG', rtg:'+2.61'},
+];
+
+const GOALIES = [
+  {name:'Scottie Scheffler',  team:'USA',val:4.81,  color:'#C9A84C'},
+  {name:'Rory McIlroy',       team:'NIR',val:4.12,  color:'#C9A84C'},
+  {name:'Xander Schauffele',  team:'USA',val:3.88,  color:'#b89640'},
+  {name:'Collin Morikawa',    team:'USA',val:3.41,  color:'#2A7A5A'},
+  {name:'Viktor Hovland',     team:'NOR',val:3.18,  color:'#2A7A5A'},
+  {name:'Patrick Cantlay',    team:'USA',val:2.94,  color:'#2A7A5A'},
+  {name:'Sam Burns',          team:'USA',val:2.82,  color:'#3a8a6a'},
+  {name:'Jon Rahm',           team:'ESP',val:2.74,  color:'#3a8a6a'},
+  {name:'Tommy Fleetwood',    team:'ENG',val:2.61,  color:'#4a9a7a'},
+  {name:'Wyndham Clark',      team:'USA',val:2.48,  color:'#4a9a7a'},
+];
+
+// ── BUILDERS ────────────────────────────────────────────────────────
+
+function buildTicker() {
+  const t = document.getElementById('tickerTrack');
+  const all = [...GAMES, ...GAMES];
+  t.innerHTML = all.map(g => {
+    const aWin = g.as < g.hs, hWin = g.hs < g.as;
+    return `<div class="game-chip">
+      <span style="color:${aWin?'var(--text)':'rgba(245,240,232,.4)'};font-weight:${aWin?600:400}">${g.away}</span>
+      <span class="g-score">${g.as}</span>
+      <span class="g-sep">—</span>
+      <span class="g-score">${g.hs}</span>
+      <span style="color:${hWin?'var(--text)':'rgba(245,240,232,.4)'};font-weight:${hWin?600:400}">${g.home}</span>
+      <span class="g-per ${g.cls}">${g.per}</span>
+    </div>`;
+  }).join('');
+}
+
+function buildStandings() {
+  document.getElementById('standingsBody').innerHTML = STANDINGS.map(p => `
+    <tr>
+      <td class="rk">${p.rk}</td>
+      <td class="lft" style="white-space:nowrap">
+        <div style="display:flex;align-items:center;gap:5px">
+          <span style="background:var(--bg-hover);color:#C9A84C;font-size:8px;font-weight:500;padding:1px 4px;border-radius:2px;min-width:28px;text-align:center;letter-spacing:.04em;font-family:'DM Mono',monospace">${p.cty}</span>
+          <span style="font-weight:500;color:var(--text);font-size:11px">${p.name}</span>
+        </div>
+      </td>
+      <td class="mono" style="color:var(--text-sec)">${p.cty}</td>
+      <td class="mono">${p.evt}</td>
+      <td class="bold">${p.w}</td>
+      <td>${p.t5}</td>
+      <td>${p.t10}</td>
+      <td class="acc">${p.pts.toLocaleString()}</td>
+      <td>${p.cuts}</td>
+      <td class="mono">${p.avg}</td>
+      <td class="${p.sgt.startsWith('+')?'grn':'red'}">${p.sgt}</td>
+      <td class="mono" style="color:var(--text-sec)">${p.sga}</td>
+      <td class="mono" style="color:var(--text-sec)">${p.sgp}</td>
+      <td class="mono" style="color:var(--text-sec)">${p.sgo}</td>
+      <td class="mono" style="color:var(--text-sec)">${p.earn}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px;justify-content:center">
+          <div class="odds-bg"><div class="odds-fill" style="width:${p.win}%"></div></div>
+          <span style="font-size:10px;font-weight:600;color:${p.win>20?'#4ade80':p.win>10?'#C9A84C':'rgba(245,240,232,.5)'};min-width:34px;font-family:'DM Mono',monospace">${p.win}%</span>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function buildLeaderboard() {
+  document.getElementById('leaderboardBody').innerHTML = LEADERS.map(p => `
+    <tr>
+      <td class="rk">${p.rk}</td>
+      <td class="lft bold" style="white-space:nowrap">${p.name}</td>
+      <td class="mono" style="color:#C9A84C">${p.cty}</td>
+      <td class="mono">${p.rds}</td>
+      <td>${p.evt}</td>
+      <td>${p.w}</td>
+      <td class="${p.sgt.startsWith('+')?'grn':'red'}">${p.sgt}</td>
+      <td class="mono" style="color:var(--text-sec)">${p.sga}</td>
+      <td class="mono" style="color:var(--text-sec)">${p.sarg}</td>
+      <td class="mono" style="color:var(--text-sec)">${p.sgp}</td>
+      <td class="mono" style="color:var(--text-sec)">${p.sgo}</td>
+      <td class="mono">${p.avg}</td>
+      <td class="mono">${p.gir}%</td>
+      <td class="mono">${p.putts}</td>
+      <td class="mono">${p.drive}</td>
+      <td class="mono" style="color:var(--text-sec)">${p.earn}</td>
+    </tr>`).join('');
+}
+
+function buildRoster() {
+  document.getElementById('rosterList').innerHTML = ROSTER.map((p, i) => `
+    <div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border)">
+      <span style="background:var(--row-num);color:var(--text-sec);font-size:10px;font-weight:500;width:18px;text-align:center;border-radius:2px;flex-shrink:0;font-family:'DM Mono',monospace">${i+2}</span>
+      <span style="flex:1;font-size:11px;font-weight:500;color:var(--text)">${p.name}</span>
+      <span style="font-size:10px;color:var(--text-sec);min-width:24px;font-family:'DM Mono',monospace">${p.pos}</span>
+      <span style="font-size:11px;font-weight:600;color:#C9A84C;font-family:'DM Mono',monospace">${p.rtg}</span>
+    </div>`).join('');
+}
+
+function buildGoalieChart() {
+  const min = 0, max = 5.2;
+  document.getElementById('goalieChart').innerHTML = GOALIES.map(g => {
+    const pct = ((g.val - min) / (max - min)) * 100;
+    const sv = (g.val >= 0 ? '+' : '') + g.val.toFixed(2);
+    return `<div class="bar-row">
+      <div class="bar-label">
+        <span style="font-weight:500;color:var(--text)">${g.name}</span>
+        <span style="color:var(--text-sec);font-size:10px;margin-left:4px;font-family:'DM Mono',monospace">${g.team}</span>
+      </div>
+      <div class="bar-bg">
+        <div class="bar-fill" style="width:${pct}%;background:${g.color}"></div>
+      </div>
+      <div class="bar-val" style="color:${g.color}">${sv}</div>
+    </div>`;
+  }).join('');
+}
+
+// ── TAB SWITCHING ────────────────────────────────────────────────────
+function switchTab(el) {
+  const group = el.closest('.tabs');
+  group.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── NAV LINKS ────────────────────────────────────────────────────────
+document.querySelectorAll('.nav-link').forEach(l =>
+  l.addEventListener('click', e => {
+    e.preventDefault();
+    document.querySelectorAll('.nav-link').forEach(x => x.classList.remove('active'));
+    l.classList.add('active');
+  })
+);
+
+// ── INIT ─────────────────────────────────────────────────────────────
+buildTicker();
+buildStandings();
+buildLeaderboard();
+buildRoster();
+buildGoalieChart();
+</script>
+
+</body>
+</html>
