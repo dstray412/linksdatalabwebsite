@@ -251,6 +251,126 @@
     ::-webkit-scrollbar-track { background: var(--bg-page); }
     ::-webkit-scrollbar-thumb { background: var(--border-s); border-radius: 2px; }
     ::-webkit-scrollbar-thumb:hover { background: #2A7A5A; }
+
+    /* ── HAMBURGER BUTTON ────────────────────────────────────── */
+    .nav-hamburger {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 20px;
+      line-height: 1;
+      flex-shrink: 0;
+      border-radius: 4px;
+      transition: background 0.15s;
+    }
+    .nav-hamburger:hover { background: var(--bg-hover); }
+
+    /* ── MOBILE NAV DRAWER ───────────────────────────────────── */
+    .nav-drawer {
+      display: none;
+      position: fixed;
+      top: 44px;
+      left: 0;
+      right: 0;
+      background: #0a150e;
+      border-bottom: 1px solid var(--border-s);
+      z-index: 48;
+      flex-direction: column;
+      padding: 6px 0;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+    }
+    .nav-drawer.open { display: flex; }
+    .nav-drawer a {
+      display: block;
+      padding: 11px 18px;
+      font-size: 13px;
+      color: rgba(245,240,232,0.55);
+      border-left: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s, background 0.15s;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .nav-drawer a:hover, .nav-drawer a.active {
+      color: var(--text);
+      border-left-color: #C9A84C;
+      background: rgba(201,168,76,0.04);
+    }
+    .nav-drawer-cta {
+      display: block;
+      margin: 8px 18px 4px;
+      background: #2D5A3D;
+      border: 1px solid rgba(201,168,76,0.35);
+      color: #C9A84C;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 8px 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+      transition: background 0.2s;
+    }
+    .nav-drawer-cta:hover { background: #3a7350; }
+
+    /* ── RESPONSIVE ──────────────────────────────────────────── */
+    @media (max-width: 1023px) {
+      .row-grid-2 { grid-template-columns: 1fr !important; }
+      .row-grid-3 { grid-template-columns: 1fr !important; }
+    }
+
+    @media (max-width: 767px) {
+      /* Nav — hide links, show hamburger */
+      .nav-link { display: none; }
+      .nav-hamburger { display: flex; align-items: center; }
+      .nav-cta { display: none; }
+
+      /* Page padding */
+      .page { padding: 8px; }
+
+      /* All grid rows → single column */
+      .row-grid-1,
+      .row-grid-2,
+      .row-grid-3 { grid-template-columns: 1fr !important; }
+
+      /* Player card body → vertical layout */
+      .pc-body { flex-direction: column !important; }
+      .pc-body .pc-photo { flex-direction: row !important; gap: 12px; align-items: flex-start; }
+      .pc-body .pc-photo img { width: 72px !important; height: 92px !important; }
+
+      /* Bar label narrower on mobile */
+      .bar-label { width: 90px; }
+
+      /* Promo banner → vertical stack */
+      .promo-banner { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
+      .promo-banner .promo-btns { width: 100%; }
+
+      /* Field builder → vertical */
+      .field-body { flex-direction: column !important; }
+      .field-body .field-hero { display: flex; flex-direction: row !important; gap: 14px; align-items: flex-start; text-align: left !important; }
+      .field-body .field-hero img { width: 80px !important; height: 100px !important; }
+
+      /* Player profile → vertical */
+      .profile-body { flex-direction: column !important; min-height: unset !important; }
+      .profile-body .profile-photo { width: 100% !important; }
+      .profile-body .profile-photo img { width: 100% !important; height: 160px !important; }
+
+      /* Tabs scrollable */
+      .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
+      .tabs::-webkit-scrollbar { display: none; }
+
+      /* Card head wraps on small screens */
+      .card-head { flex-wrap: wrap; gap: 6px; }
+    }
+
+    @media (max-width: 480px) {
+      body { font-size: 12px; }
+      .page { padding: 6px; }
+      .bar-label { width: 75px; font-size: 10px; }
+      .nav-drawer { top: 44px; }
+    }
   </style>
   <!-- Three.js via ES module importmap -->
 </head>
@@ -280,7 +400,23 @@
   <a class="nav-link" href="#">More ▾</a>
   <div style="flex:1"></div>
   <button class="nav-cta">SG: Total Leaders →</button>
+  <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false">☰</button>
 </nav>
+
+<!-- ── MOBILE NAV DRAWER ──────────────────────────────────────────── -->
+<div class="nav-drawer" id="navDrawer">
+  <a class="active" href="#">Home</a>
+  <a href="#">Tour</a>
+  <a href="#">Players</a>
+  <a href="#">Courses</a>
+  <a href="#">Stats</a>
+  <a href="#">Strokes Gained</a>
+  <a href="#">Dashboards</a>
+  <a href="#">Leaderboard</a>
+  <a href="#">Fantasy</a>
+  <a href="#">More</a>
+  <button class="nav-drawer-cta">SG: Total Leaders →</button>
+</div>
 
 <!-- ── PAGE ─────────────────────────────────────────────────────── -->
 <main class="page">
@@ -295,7 +431,7 @@
   </div>
 
   <!-- ROW 1: Player Card + FedEx Standings -->
-  <div style="display:grid;grid-template-columns:330px 1fr;gap:10px;margin-bottom:10px">
+  <div class="row-grid-1" style="display:grid;grid-template-columns:330px 1fr;gap:10px;margin-bottom:10px">
 
     <!-- PLAYER CARD -->
     <div class="card">
@@ -309,12 +445,12 @@
       </div>
 
       <!-- Card body -->
-      <div id="pcBody" style="position:relative;background:linear-gradient(140deg,#0a150e 0%,#1e4a2e 60%,#0a150e 100%);padding:12px;display:flex;gap:10px;overflow:hidden">
+      <div id="pcBody" class="pc-body" style="position:relative;background:linear-gradient(140deg,#0a150e 0%,#1e4a2e 60%,#0a150e 100%);padding:12px;display:flex;gap:10px;overflow:hidden">
         <!-- Glow -->
         <div style="position:absolute;inset:0;background:radial-gradient(circle at 65% 40%,rgba(201,168,76,.12) 0%,transparent 65%);pointer-events:none"></div>
 
         <!-- Photo -->
-        <div style="flex-shrink:0;z-index:1">
+        <div class="pc-photo" style="flex-shrink:0;z-index:1">
           <img src="https://placehold.co/90x115/1A3A2A/C9A84C?text=SS" alt="Scottie Scheffler"
                style="width:90px;height:115px;object-fit:cover;border-radius:6px;border:2px solid rgba(201,168,76,.35);display:block">
           <div style="margin-top:5px;display:flex;gap:3px;justify-content:center">
@@ -443,7 +579,7 @@
   </div>
 
   <!-- ROW 2: Strokes Gained Leaderboard + Field Builder -->
-  <div style="display:grid;grid-template-columns:1fr 370px;gap:10px;margin-bottom:10px">
+  <div class="row-grid-2" style="display:grid;grid-template-columns:1fr 370px;gap:10px;margin-bottom:10px">
 
     <!-- STROKES GAINED LEADERBOARD -->
     <div class="card">
@@ -512,9 +648,9 @@
           <button class="tab" onclick="switchTab(this)">The Open</button>
         </div>
       </div>
-      <div style="padding:12px;display:flex;gap:12px;align-items:flex-start">
+      <div class="field-body" style="padding:12px;display:flex;gap:12px;align-items:flex-start">
         <!-- Player hero -->
-        <div style="flex-shrink:0;text-align:center">
+        <div class="field-hero" style="flex-shrink:0;text-align:center">
           <div style="position:relative;display:inline-block">
             <img src="https://placehold.co/110x140/1A3A2A/C9A84C?text=McIlroy" alt="Rory McIlroy"
                  style="width:110px;height:140px;object-fit:cover;border-radius:6px;border:2px solid rgba(201,168,76,.3);display:block">
@@ -539,7 +675,7 @@
   </div>
 
   <!-- PROMO BANNER -->
-  <div style="background:linear-gradient(135deg,#0a150e 0%,#1e4a2e 100%);border:1px solid var(--border-s);border-radius:6px;padding:12px 18px;margin-bottom:10px;display:flex;align-items:center;gap:16px;overflow:hidden;position:relative">
+  <div class="promo-banner" style="background:linear-gradient(135deg,#0a150e 0%,#1e4a2e 100%);border:1px solid var(--border-s);border-radius:6px;padding:12px 18px;margin-bottom:10px;display:flex;align-items:center;gap:16px;overflow:hidden;position:relative">
     <div style="position:absolute;inset:0;background:radial-gradient(circle at 20% 50%,rgba(201,168,76,.07) 0%,transparent 60%);pointer-events:none"></div>
     <img src="logo.png" alt="LinksData Lab" style="width:56px;height:56px;object-fit:contain;flex-shrink:0;position:relative;z-index:1;opacity:.9">
     <div style="flex:1;position:relative;z-index:1">
@@ -547,14 +683,14 @@
       <div style="font-size:17px;font-weight:700;color:var(--text);line-height:1.2;font-family:Georgia,serif">The Science Behind the <span style="color:#C9A84C">Swing.</span></div>
       <div style="font-size:10px;color:var(--text-sec);margin-top:3px">Advanced strokes-gained dashboards and tour analytics — built for serious golf fans.</div>
     </div>
-    <div style="display:flex;gap:6px;flex-shrink:0;position:relative;z-index:1">
+    <div class="promo-btns" style="display:flex;gap:6px;flex-shrink:0;position:relative;z-index:1;flex-wrap:wrap">
       <button style="background:#C9A84C;color:#0D1A14;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;padding:7px 14px;border-radius:5px;border:none;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">Explore Data</button>
       <button style="background:none;border:1px solid var(--border-s);color:var(--text-sec);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:400;padding:7px 14px;border-radius:5px;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='#C9A84C'" onmouseout="this.style.borderColor='var(--border-s)'">Join Community</button>
     </div>
   </div>
 
   <!-- ROW 3: Player Profile + Strokes Gained Dashboard -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+  <div class="row-grid-3" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
 
     <!-- PLAYER PROFILE -->
     <div class="card">
@@ -567,9 +703,9 @@
           <button class="tab" onclick="switchTab(this)">Veterans</button>
         </div>
       </div>
-      <div style="display:flex;min-height:220px">
+      <div class="profile-body" style="display:flex;min-height:220px">
         <!-- Photo -->
-        <div style="width:130px;flex-shrink:0;position:relative;overflow:hidden">
+        <div class="profile-photo" style="width:130px;flex-shrink:0;position:relative;overflow:hidden">
           <img src="https://placehold.co/130x240/0a150e/C9A84C?text=Schauffele" alt="Xander Schauffele"
                style="width:130px;height:240px;object-fit:cover;filter:grayscale(30%);display:block">
           <div style="position:absolute;inset:0;background:linear-gradient(to right,transparent 40%,var(--bg-card) 100%)"></div>
@@ -953,6 +1089,34 @@ document.querySelectorAll('.nav-link').forEach(l =>
 // ── INIT ─────────────────────────────────────────────────────────────
 buildTicker();
 loadSheetData();
+
+// ── MOBILE NAV HAMBURGER ──────────────────────────────────────────────
+(function() {
+  const btn = document.getElementById('navHamburger');
+  const drawer = document.getElementById('navDrawer');
+  if (!btn || !drawer) return;
+  btn.addEventListener('click', function() {
+    const open = drawer.classList.toggle('open');
+    btn.setAttribute('aria-expanded', open);
+    btn.textContent = open ? '✕' : '☰';
+  });
+  // Close drawer when a link is clicked
+  drawer.querySelectorAll('a').forEach(function(link) {
+    link.addEventListener('click', function() {
+      drawer.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.textContent = '☰';
+    });
+  });
+  // Close drawer on outside click
+  document.addEventListener('click', function(e) {
+    if (!drawer.contains(e.target) && !btn.contains(e.target)) {
+      drawer.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+      btn.textContent = '☰';
+    }
+  });
+})();
 </script>
 
 <footer style="border-top:1px solid var(--border);margin-top:24px;padding:12px 10px;text-align:center;font-size:10px;color:var(--text-sec);font-family:'DM Mono',monospace;letter-spacing:0.04em">
