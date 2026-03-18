@@ -409,7 +409,7 @@
       body { font-size: 12px; }
       .page { padding: 6px; }
       .bar-label { width: 75px; font-size: 10px; }
-      .nav-drawer { top: 44px; }
+      /* nav-drawer top is set dynamically via JS */
     }
   </style>
 </head>
@@ -1924,6 +1924,9 @@ document.getElementById('playerSearch').addEventListener('input', applyFilters);
   const drawer = document.getElementById('navDrawer');
   if (!btn || !drawer) return;
   btn.addEventListener('click', function() {
+    const navBottom = document.querySelector('.nav').getBoundingClientRect().bottom;
+    drawer.style.top = navBottom + 'px';
+    drawer.style.maxHeight = 'calc(100vh - ' + navBottom + 'px)';
     const open = drawer.classList.toggle('open');
     btn.setAttribute('aria-expanded', open);
     btn.textContent = open ? '✕' : '☰';
