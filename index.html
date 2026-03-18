@@ -315,6 +315,60 @@
     }
     .nav-drawer-cta:hover { background: #3a7350; }
 
+    /* ── SPA ROUTER ──────────────────────────────────────────── */
+    .page-view { display: none; }
+    .page-view.active { display: block; }
+
+    /* ── PLAYER MODAL ────────────────────────────────────────── */
+    #playerModal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.88);
+      z-index: 200;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    #playerModal.open { opacity: 1; pointer-events: all; }
+    #playerModal .modal-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border-s);
+      border-radius: 8px;
+      width: 100%;
+      max-width: 560px;
+      max-height: 88vh;
+      overflow-y: auto;
+      position: relative;
+      transform: translateY(14px);
+      transition: transform 0.2s;
+    }
+    #playerModal.open .modal-box { transform: translateY(0); }
+    .modal-close {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: var(--text-sec);
+      font-size: 18px;
+      cursor: pointer;
+      z-index: 10;
+      line-height: 1;
+      padding: 4px 6px;
+      border-radius: 3px;
+      transition: color 0.15s, background 0.15s;
+    }
+    .modal-close:hover { color: var(--text); background: var(--bg-hover); }
+
+    /* ── PLAYER ROW (clickable) ──────────────────────────────── */
+    .player-row { cursor: pointer; }
+    .player-row td.name-cell { color: var(--text-acc); font-weight: 500; }
+    .player-row:hover td.name-cell { color: #C9A84C !important; text-decoration: underline; }
+
     /* ── RESPONSIVE ──────────────────────────────────────────── */
     @media (max-width: 1023px) {
       .row-grid-2 { grid-template-columns: 1fr !important; }
@@ -322,47 +376,30 @@
     }
 
     @media (max-width: 767px) {
-      /* Nav — hide links, show hamburger */
       .nav-link { display: none; }
       .nav-hamburger { display: flex; align-items: center; }
       .nav-cta { display: none; }
-
-      /* Page padding */
       .page { padding: 8px; }
-
-      /* All grid rows → single column */
       .row-grid-1,
       .row-grid-2,
       .row-grid-3 { grid-template-columns: 1fr !important; }
-
-      /* Player card body → vertical layout */
       .pc-body { flex-direction: column !important; }
       .pc-body .pc-photo { flex-direction: row !important; gap: 12px; align-items: flex-start; }
       .pc-body .pc-photo img { width: 72px !important; height: 92px !important; }
-
-      /* Bar label narrower on mobile */
       .bar-label { width: 90px; }
-
-      /* Promo banner → vertical stack */
       .promo-banner { flex-direction: column !important; align-items: flex-start !important; gap: 10px !important; }
       .promo-banner .promo-btns { width: 100%; }
-
-      /* Field builder → vertical */
       .field-body { flex-direction: column !important; }
       .field-body .field-hero { display: flex; flex-direction: row !important; gap: 14px; align-items: flex-start; text-align: left !important; }
       .field-body .field-hero img { width: 80px !important; height: 100px !important; }
-
-      /* Player profile → vertical */
       .profile-body { flex-direction: column !important; min-height: unset !important; }
       .profile-body .profile-photo { width: 100% !important; }
       .profile-body .profile-photo img { width: 100% !important; height: 160px !important; }
-
-      /* Tabs scrollable */
       .tabs { overflow-x: auto; -webkit-overflow-scrolling: touch; flex-wrap: nowrap; }
       .tabs::-webkit-scrollbar { display: none; }
-
-      /* Card head wraps on small screens */
       .card-head { flex-wrap: wrap; gap: 6px; }
+      #playerModal { padding: 10px; }
+      #playerModal .modal-box { max-height: 94vh; }
     }
 
     @media (max-width: 480px) {
@@ -372,11 +409,8 @@
       .nav-drawer { top: 44px; }
     }
   </style>
-  <!-- Three.js via ES module importmap -->
 </head>
 <body>
-
-<div id="contentWrapper">
 
 <!-- ── SCORE TICKER ─────────────────────────────────────────────── -->
 <div class="ticker-wrap">
@@ -386,39 +420,42 @@
 <!-- ── NAVIGATION ───────────────────────────────────────────────── -->
 <nav class="nav">
   <span class="nav-logo">
-    <img src="logo.png" alt="LinksData Lab">
+    <a href="#home"><img src="logo.png" alt="LinksData Lab"></a>
   </span>
-  <a class="nav-link active" href="#">Home</a>
-  <a class="nav-link" href="#">Tour</a>
-  <a class="nav-link" href="#">Players</a>
-  <a class="nav-link" href="#">Courses</a>
-  <a class="nav-link" href="#">Stats</a>
-  <a class="nav-link" href="#">Strokes Gained</a>
-  <a class="nav-link" href="#">Dashboards</a>
-  <a class="nav-link" href="#">Leaderboard</a>
-  <a class="nav-link" href="#">Fantasy</a>
+  <a class="nav-link active" href="#home">Home</a>
+  <a class="nav-link" href="#tour">Tour</a>
+  <a class="nav-link" href="#players">Players</a>
+  <a class="nav-link" href="#courses">Courses</a>
+  <a class="nav-link" href="#stats">Stats</a>
+  <a class="nav-link" href="#strokes-gained">Strokes Gained</a>
+  <a class="nav-link" href="#dashboards">Dashboards</a>
+  <a class="nav-link" href="#leaderboard">Leaderboard</a>
+  <a class="nav-link" href="#fantasy">Fantasy</a>
   <a class="nav-link" href="#">More ▾</a>
   <div style="flex:1"></div>
-  <button class="nav-cta">SG: Total Leaders →</button>
+  <button class="nav-cta" onclick="location.hash='#strokes-gained'">SG: Total Leaders →</button>
   <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false">☰</button>
 </nav>
 
 <!-- ── MOBILE NAV DRAWER ──────────────────────────────────────────── -->
 <div class="nav-drawer" id="navDrawer">
-  <a class="active" href="#">Home</a>
-  <a href="#">Tour</a>
-  <a href="#">Players</a>
-  <a href="#">Courses</a>
-  <a href="#">Stats</a>
-  <a href="#">Strokes Gained</a>
-  <a href="#">Dashboards</a>
-  <a href="#">Leaderboard</a>
-  <a href="#">Fantasy</a>
+  <a class="active" href="#home">Home</a>
+  <a href="#tour">Tour</a>
+  <a href="#players">Players</a>
+  <a href="#courses">Courses</a>
+  <a href="#stats">Stats</a>
+  <a href="#strokes-gained">Strokes Gained</a>
+  <a href="#dashboards">Dashboards</a>
+  <a href="#leaderboard">Leaderboard</a>
+  <a href="#fantasy">Fantasy</a>
   <a href="#">More</a>
-  <button class="nav-drawer-cta">SG: Total Leaders →</button>
+  <button class="nav-drawer-cta" onclick="location.hash='#strokes-gained'">SG: Total Leaders →</button>
 </div>
 
-<!-- ── PAGE ─────────────────────────────────────────────────────── -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  HOME VIEW                                                        -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div id="homeView" class="page-view active">
 <main class="page">
 
   <!-- WORDMARK -->
@@ -438,18 +475,14 @@
       <div class="card-head">
         <span class="card-title">Player Intelligence</span>
         <div style="display:flex;align-items:center;gap:6px">
-          <button style="background:none;border:none;color:var(--text-sec);cursor:pointer;font-size:13px;padding:0;line-height:1;transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-sec)'">◀</button>
+          <button onclick="prevPlayerCard()" style="background:none;border:none;color:var(--text-sec);cursor:pointer;font-size:13px;padding:0;line-height:1;transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-sec)'">◀</button>
           <span id="pcNameDisplay" style="font-size:10px;font-weight:500;color:var(--text);letter-spacing:.06em;font-family:'DM Mono',monospace">SCOTTIE SCHEFFLER</span>
-          <button style="background:none;border:none;color:var(--text-sec);cursor:pointer;font-size:13px;padding:0;line-height:1;transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-sec)'">▶</button>
+          <button onclick="nextPlayerCard()" style="background:none;border:none;color:var(--text-sec);cursor:pointer;font-size:13px;padding:0;line-height:1;transition:color .2s" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-sec)'">▶</button>
         </div>
       </div>
 
-      <!-- Card body -->
       <div id="pcBody" class="pc-body" style="position:relative;background:linear-gradient(140deg,#0a150e 0%,#1e4a2e 60%,#0a150e 100%);padding:12px;display:flex;gap:10px;overflow:hidden">
-        <!-- Glow -->
         <div style="position:absolute;inset:0;background:radial-gradient(circle at 65% 40%,rgba(201,168,76,.12) 0%,transparent 65%);pointer-events:none"></div>
-
-        <!-- Photo -->
         <div class="pc-photo" style="flex-shrink:0;z-index:1">
           <img src="https://placehold.co/90x115/1A3A2A/C9A84C?text=SS" alt="Scottie Scheffler"
                style="width:90px;height:115px;object-fit:cover;border-radius:6px;border:2px solid rgba(201,168,76,.35);display:block">
@@ -458,16 +491,12 @@
             <span style="background:rgba(42,122,90,.15);color:var(--text-sec);font-size:8px;font-weight:400;padding:1px 5px;border-radius:2px;font-family:'DM Mono',monospace">#1 WR</span>
           </div>
         </div>
-
-        <!-- Stats -->
         <div style="flex:1;min-width:0;z-index:1">
           <div style="line-height:1;margin-bottom:8px">
             <div style="font-size:17px;font-weight:700;letter-spacing:-.02em;color:var(--text);font-family:Georgia,serif">SCOTTIE</div>
             <div style="font-size:17px;font-weight:700;letter-spacing:-.02em;color:var(--text);font-family:Georgia,serif">SCHEFFLER</div>
             <div style="font-size:9px;color:var(--text-sec);margin-top:2px">PGA Tour · World No. 1</div>
           </div>
-
-          <!-- Gauge row -->
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
             <div class="gauge-wrap">
               <svg viewBox="0 0 68 68">
@@ -484,8 +513,6 @@
               <div style="font-size:9px;color:var(--text-sec);margin-top:2px">99th Percentile</div>
             </div>
           </div>
-
-          <!-- Stat grid -->
           <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:8px">
             <div style="text-align:center;background:rgba(42,122,90,.1);border-radius:3px;padding:3px 1px">
               <div style="font-size:8px;color:var(--text-sec);text-transform:uppercase;font-family:'DM Mono',monospace">EVT</div>
@@ -508,8 +535,6 @@
               <div style="font-size:13px;font-weight:500;color:#C9A84C;font-family:'DM Mono',monospace">69.4</div>
             </div>
           </div>
-
-          <!-- Stat bars -->
           <div style="display:flex;flex-direction:column;gap:4px">
             <div>
               <div style="display:flex;justify-content:space-between;font-size:8px;color:var(--text-sec);margin-bottom:2px;font-family:'DM Mono',monospace"><span>SG: APR</span><span>+2.14</span></div>
@@ -527,11 +552,10 @@
         </div>
       </div>
 
-      <!-- Card footer -->
       <div style="background:rgba(42,122,90,.1);border-top:1px solid var(--border-s);padding:5px 10px;display:flex;justify-content:space-between;align-items:center">
         <span style="font-size:8px;font-weight:500;letter-spacing:.1em;color:var(--text-sec);text-transform:uppercase;font-family:'DM Mono',monospace">Fantasy Golf</span>
         <div style="display:flex;gap:6px;font-size:9px;color:var(--text-sec)">
-          <span style="cursor:pointer;transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Player Cards</span>
+          <a href="#players" style="cursor:pointer;transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Player Cards</a>
           <span>·</span>
           <span style="cursor:pointer;transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Round Stats</span>
         </div>
@@ -594,7 +618,6 @@
           <button class="tab" onclick="switchTab(this)">Driving</button>
         </div>
       </div>
-      <!-- Filter bar -->
       <div style="background:var(--bg-secondary);padding:4px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);flex-wrap:wrap">
         <span style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace">Filter:</span>
         <div class="tabs">
@@ -649,7 +672,6 @@
         </div>
       </div>
       <div class="field-body" style="padding:12px;display:flex;gap:12px;align-items:flex-start">
-        <!-- Player hero -->
         <div class="field-hero" style="flex-shrink:0;text-align:center">
           <div style="position:relative;display:inline-block">
             <img src="https://placehold.co/110x140/1A3A2A/C9A84C?text=McIlroy" alt="Rory McIlroy"
@@ -661,7 +683,6 @@
           <div style="margin-top:20px;font-size:13px;font-weight:500;color:var(--text)">Rory McIlroy</div>
           <div style="font-size:9px;color:var(--text-sec)">NIR · World No. 2</div>
         </div>
-        <!-- Field list -->
         <div style="flex:1;min-width:0">
           <div style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;font-family:'DM Mono',monospace">Top Picks</div>
           <div id="rosterList"></div>
@@ -684,7 +705,7 @@
       <div style="font-size:10px;color:var(--text-sec);margin-top:3px">Advanced strokes-gained dashboards and tour analytics — built for serious golf fans.</div>
     </div>
     <div class="promo-btns" style="display:flex;gap:6px;flex-shrink:0;position:relative;z-index:1;flex-wrap:wrap">
-      <button style="background:#C9A84C;color:#0D1A14;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;padding:7px 14px;border-radius:5px;border:none;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">Explore Data</button>
+      <button style="background:#C9A84C;color:#0D1A14;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;padding:7px 14px;border-radius:5px;border:none;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'" onclick="location.hash='#players'">Explore Data</button>
       <button style="background:none;border:1px solid var(--border-s);color:var(--text-sec);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:400;padding:7px 14px;border-radius:5px;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='#C9A84C'" onmouseout="this.style.borderColor='var(--border-s)'">Join Community</button>
     </div>
   </div>
@@ -704,25 +725,23 @@
         </div>
       </div>
       <div class="profile-body" style="display:flex;min-height:220px">
-        <!-- Photo -->
         <div class="profile-photo" style="width:130px;flex-shrink:0;position:relative;overflow:hidden">
           <img src="https://placehold.co/130x240/0a150e/C9A84C?text=Schauffele" alt="Xander Schauffele"
                style="width:130px;height:240px;object-fit:cover;filter:grayscale(30%);display:block">
           <div style="position:absolute;inset:0;background:linear-gradient(to right,transparent 40%,var(--bg-card) 100%)"></div>
           <div style="position:absolute;bottom:8px;left:8px;font-size:8px;color:var(--text-sec);font-family:'DM Mono',monospace">USA · Olympic Gold</div>
         </div>
-        <!-- Text -->
         <div style="flex:1;padding:12px 14px;overflow-y:auto;max-height:240px">
           <div style="font-size:20px;font-weight:700;letter-spacing:-.01em;color:var(--text);line-height:1;margin-bottom:2px;font-family:Georgia,serif">XANDER SCHAUFFELE</div>
           <div style="font-size:9px;color:#C9A84C;text-transform:uppercase;letter-spacing:.09em;margin-bottom:10px;font-family:'DM Mono',monospace">PGA Tour · #3 World Ranking</div>
           <p style="font-size:11px;color:var(--text-sec);line-height:1.7;font-family:'DM Sans',sans-serif">
-            One of the most complete ball-strikers in the modern game. Schauffele's strokes-gained approach profile is among the elite — combining tight dispersion off the tee with a surgical iron game that consistently converts birdie looks at a rate few players can match. His 2024 season marked a coming-of-age moment: a breakthrough major win backed by a statistical profile that had long suggested he was a major champion in waiting.
+            One of the most complete ball-strikers in the modern game. Schauffele's strokes-gained approach profile is among the elite — combining tight dispersion off the tee with a surgical iron game that consistently converts birdie looks at a rate few players can match.
           </p>
           <p style="font-size:11px;color:var(--text-sec);line-height:1.7;font-family:'DM Sans',sans-serif;margin-top:8px">
             Around the green, Schauffele demonstrates elite touch and trajectory control. His flat-stick performance has improved meaningfully year-over-year. The combination of long-game dominance and a sharpened short game creates a player who can win on any course setup.
           </p>
           <div style="margin-top:10px;display:flex;gap:6px">
-            <button style="background:#2D5A3D;border:1px solid rgba(201,168,76,.3);color:#C9A84C;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;padding:3px 9px;border-radius:3px;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#3a7350'" onmouseout="this.style.background='#2D5A3D'">View Profile</button>
+            <button style="background:#2D5A3D;border:1px solid rgba(201,168,76,.3);color:#C9A84C;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;padding:3px 9px;border-radius:3px;cursor:pointer;transition:background .2s" onclick="location.hash='#players'" onmouseover="this.style.background='#3a7350'" onmouseout="this.style.background='#2D5A3D'">View All Players</button>
             <button style="background:none;border:1px solid var(--border);color:var(--text-sec);font-family:'DM Sans',sans-serif;font-size:9px;font-weight:400;padding:3px 9px;border-radius:3px;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--border-s)'" onmouseout="this.style.borderColor='var(--border)'">Next ▶</button>
           </div>
         </div>
@@ -759,12 +778,12 @@
       <img src="logo.png" alt="LinksData Lab" style="height:18px;width:auto;opacity:.7">
     </div>
     <div style="margin-bottom:4px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px">
-      <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Home</a>
-      <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Players</a>
-      <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Courses</a>
-      <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Standings</a>
-      <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Stats</a>
-      <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Strokes Gained</a>
+      <a href="#home" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Home</a>
+      <a href="#players" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Players</a>
+      <a href="#courses" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Courses</a>
+      <a href="#leaderboard" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Standings</a>
+      <a href="#stats" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Stats</a>
+      <a href="#strokes-gained" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Strokes Gained</a>
       <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Privacy Policy</a>
       <a href="#" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Terms of Use</a>
     </div>
@@ -772,8 +791,157 @@
   </div>
 
 </main>
+</div><!-- /homeView -->
 
-</div><!-- /#contentWrapper -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  PLAYERS VIEW                                                     -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div id="playersView" class="page-view">
+<main class="page">
+
+  <!-- Header -->
+  <div style="padding:20px 0 16px;position:relative">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(201,168,76,.05) 0%,transparent 70%);pointer-events:none"></div>
+    <a href="#home" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--text-sec);font-family:'DM Mono',monospace;letter-spacing:.06em;transition:color .2s;margin-bottom:10px;cursor:pointer;text-decoration:none" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">← HOME</a>
+    <h1 style="font-family:Georgia,serif;font-size:clamp(22px,3.5vw,40px);font-weight:700;letter-spacing:-.03em;color:var(--text);position:relative;z-index:1">
+      Player <span style="color:#C9A84C">Database</span>
+    </h1>
+    <div style="font-size:11px;color:var(--text-sec);margin-top:5px">Click any player name to view their full card and stats</div>
+  </div>
+
+  <!-- Table Card -->
+  <div class="card" style="margin-bottom:10px">
+    <div class="card-head" style="flex-wrap:wrap;gap:8px">
+      <span class="card-title">All Players</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="playerCount" style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace"></span>
+        <input id="playerSearch" type="text" placeholder="Search players…"
+               style="background:var(--bg-hover);border:1px solid var(--border-s);color:var(--text);font-size:11px;padding:3px 8px;border-radius:3px;font-family:'DM Sans',sans-serif;width:160px;outline:none;transition:border-color .2s"
+               onfocus="this.style.borderColor='rgba(0,200,50,.5)'" onblur="this.style.borderColor='var(--border-s)'">
+      </div>
+    </div>
+    <!-- Sort bar -->
+    <div style="background:var(--bg-secondary);padding:4px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);flex-wrap:wrap">
+      <span style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace">Sort by:</span>
+      <div class="tabs" id="playerSortTabs">
+        <button class="tab active" onclick="switchTab(this);sortPlayers('rank')">World Rank</button>
+        <button class="tab" onclick="switchTab(this);sortPlayers('sg')">SG: Total</button>
+        <button class="tab" onclick="switchTab(this);sortPlayers('wins')">Wins</button>
+        <button class="tab" onclick="switchTab(this);sortPlayers('scoring')">Scoring Avg</button>
+        <button class="tab" onclick="switchTab(this);sortPlayers('earnings')">Earnings</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="dt">
+        <thead>
+          <tr>
+            <th class="lft" style="width:24px">RK</th>
+            <th class="lft" style="min-width:170px">PLAYER</th>
+            <th>CTY</th>
+            <th>W</th>
+            <th>T10</th>
+            <th>CUTS</th>
+            <th>AVG SCR</th>
+            <th>SG TOT</th>
+            <th>SG APR</th>
+            <th>SG ARG</th>
+            <th>SG PUTT</th>
+            <th>SG OTT</th>
+            <th>GIR%</th>
+            <th>DRIVE</th>
+            <th>EARNINGS</th>
+          </tr>
+        </thead>
+        <tbody id="allPlayersBody">
+          <tr><td colspan="15" style="text-align:center;padding:24px;color:var(--text-sec);font-family:'DM Mono',monospace;font-size:11px">Loading players…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align:center;padding:14px 0;color:var(--text-sec);font-size:9px;border-top:1px solid var(--border)">
+    <div>© 2026 LinksData Lab · The Science Behind the Swing. · Tour data for informational purposes.</div>
+  </div>
+
+</main>
+</div><!-- /playersView -->
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  STROKES GAINED VIEW                                              -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div id="strokesGainedView" class="page-view">
+<main class="page">
+
+  <!-- Header -->
+  <div style="padding:20px 0 16px;position:relative">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(201,168,76,.05) 0%,transparent 70%);pointer-events:none"></div>
+    <a href="#home" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--text-sec);font-family:'DM Mono',monospace;letter-spacing:.06em;transition:color .2s;margin-bottom:10px;cursor:pointer;text-decoration:none" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">← HOME</a>
+    <h1 style="font-family:Georgia,serif;font-size:clamp(22px,3.5vw,40px);font-weight:700;letter-spacing:-.03em;color:var(--text);position:relative;z-index:1">
+      Strokes <span style="color:#C9A84C">Gained Leaders</span>
+    </h1>
+    <div style="font-size:11px;color:var(--text-sec);margin-top:5px">Top 10 leaders in each strokes gained category</div>
+  </div>
+
+  <!-- SG Charts Grid -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:10px;margin-bottom:10px" id="sgChartsGrid">
+
+    <!-- SG: Total -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">SG: Total</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Strokes vs. field / round</span>
+      </div>
+      <div style="padding:8px 10px" id="sgTotalChart"></div>
+    </div>
+
+    <!-- SG: Off the Tee -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">SG: Off the Tee</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Tee shot performance</span>
+      </div>
+      <div style="padding:8px 10px" id="sgOTTChart"></div>
+    </div>
+
+    <!-- SG: Approach -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">SG: Approach</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Approach shot performance</span>
+      </div>
+      <div style="padding:8px 10px" id="sgAPRChart"></div>
+    </div>
+
+    <!-- SG: Around Green -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">SG: Around Green</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Short game performance</span>
+      </div>
+      <div style="padding:8px 10px" id="sgARGChart"></div>
+    </div>
+
+    <!-- SG: Putting -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">SG: Putting</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Putting performance</span>
+      </div>
+      <div style="padding:8px 10px" id="sgPUTTChart"></div>
+    </div>
+
+  </div>
+
+</main>
+</div><!-- /strokesGainedView -->
+
+<!-- ── PLAYER MODAL ─────────────────────────────────────────────── -->
+<div id="playerModal" onclick="if(event.target===this)closePlayerModal()">
+  <div class="modal-box">
+    <div id="playerModalContent"></div>
+  </div>
+</div>
 
 <script>
 // ── SHEET CONFIG ─────────────────────────────────────────────────────
@@ -798,10 +966,15 @@ const GAMES = [
 // ── BAR COLORS ────────────────────────────────────────────────────────
 const BAR_COLORS = ['#C9A84C','#C9A84C','#b89640','#2A7A5A','#2A7A5A','#2A7A5A','#3a8a6a','#3a8a6a','#4a9a7a','#4a9a7a'];
 
+// ── GLOBAL PLAYER DATA ────────────────────────────────────────────────
+let ALL_PLAYERS = [];
+let _sortKey    = 'rank';
+let pcPlayerList  = [];
+let pcPlayerIndex = 0;
+
 // ── CSV PARSER ────────────────────────────────────────────────────────
 function parseCSV(text) {
   const lines = text.trim().split(/\r?\n/);
-  // Sheet has 2 preamble rows (title + category) before the real column headers
   const headers = lines[2].split(',').map(h => h.replace(/^"|"$/g, '').trim());
   return lines.slice(3).map(line => {
     const fields = [];
@@ -836,8 +1009,11 @@ function fmtNum(v, d) {
   return d ? n.toFixed(d) : String(Math.round(n));
 }
 function sgCls(v) { return String(v).startsWith('+') ? 'grn' : String(v).startsWith('-') ? 'red' : 'mono'; }
+function escHtml(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
-// ── PLAYER CARD ───────────────────────────────────────────────────────
+// ── PLAYER CARD (home page) ───────────────────────────────────────────
 function renderPlayerCard(p) {
   if (!p) return;
   const name = p['Player Name'] || '';
@@ -931,13 +1107,63 @@ function renderPlayerCard(p) {
     </div>`;
 }
 
+// ── PLAYER CARD NAVIGATION ───────────────────────────────────────────
+function prevPlayerCard() {
+  if (!pcPlayerList.length) return;
+  pcPlayerIndex = (pcPlayerIndex - 1 + pcPlayerList.length) % pcPlayerList.length;
+  renderPlayerCard(pcPlayerList[pcPlayerIndex]);
+}
+function nextPlayerCard() {
+  if (!pcPlayerList.length) return;
+  pcPlayerIndex = (pcPlayerIndex + 1) % pcPlayerList.length;
+  renderPlayerCard(pcPlayerList[pcPlayerIndex]);
+}
+
 // ── LOAD SHEET DATA ──────────────────────────────────────────────────
+// ── SG LEADERS VIEW ──────────────────────────────────────────────────
+function buildSGChart(containerId, players, field) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const sorted = [...players]
+    .filter(p => parseFloat(p[field]) !== 0 && !isNaN(parseFloat(p[field])))
+    .sort((a, b) => (parseFloat(b[field]) || 0) - (parseFloat(a[field]) || 0))
+    .slice(0, 10);
+  if (!sorted.length) { el.innerHTML = '<div style="color:var(--text-sec);font-size:11px;padding:8px">No data</div>'; return; }
+  const maxVal = parseFloat(sorted[0][field]) || 1;
+  el.innerHTML = sorted.map((p, i) => {
+    const val = parseFloat(p[field]) || 0;
+    const pct = Math.max(2, (val / maxVal) * 100).toFixed(1);
+    const sv  = fmtSG(p[field]);
+    const color = BAR_COLORS[i] || '#4a9a7a';
+    return `<div class="bar-row">
+      <div class="bar-label" style="display:flex;align-items:center;gap:4px">
+        <span style="background:var(--row-num);color:var(--text-sec);font-size:9px;font-family:'DM Mono',monospace;min-width:16px;text-align:center;border-radius:2px;flex-shrink:0">${i + 1}</span>
+        <span style="font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p['Player Name']}</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div>
+      <div class="bar-val" style="color:${color}">${sv}</div>
+    </div>`;
+  }).join('');
+}
+
+function populateSGView(players) {
+  buildSGChart('sgTotalChart', players, 'SG: Total');
+  buildSGChart('sgOTTChart',   players, 'SG: Off the Tee');
+  buildSGChart('sgAPRChart',   players, 'SG: Approach');
+  buildSGChart('sgARGChart',   players, 'SG: Around Green');
+  buildSGChart('sgPUTTChart',  players, 'SG: Putting');
+}
+
 async function loadSheetData() {
   try {
     const res = await fetch(SHEET_CSV);
     if (!res.ok) throw new Error('fetch ' + res.status);
     const text = await res.text();
     const players = parseCSV(text);
+
+    ALL_PLAYERS = [...players];
+
+    populateSGView(players);
 
     const byRank = [...players].sort((a, b) => (parseInt(a['OWG Rank']) || 999) - (parseInt(b['OWG Rank']) || 999));
     const bySG   = [...players].sort((a, b) => (parseFloat(b['SG: Total']) || 0) - (parseFloat(a['SG: Total']) || 0));
@@ -1045,11 +1271,233 @@ async function loadSheetData() {
     }).join('');
 
     // ── Player card (#1 by world rank) ────────────────────────────
+    pcPlayerList  = byRank;
+    pcPlayerIndex = 0;
     renderPlayerCard(byRank[0]);
+
+    // ── Players page table ────────────────────────────────────────
+    applyFilters();
 
   } catch (e) {
     console.error('Sheet load failed:', e);
+    document.getElementById('allPlayersBody').innerHTML =
+      '<tr><td colspan="15" style="text-align:center;padding:24px;color:#f87171;font-family:\'DM Mono\',monospace;font-size:11px">Failed to load data</td></tr>';
   }
+}
+
+// ── RENDER PLAYERS TABLE ──────────────────────────────────────────────
+function renderPlayersTable(players) {
+  const body = document.getElementById('allPlayersBody');
+  if (!body) return;
+  const cnt = document.getElementById('playerCount');
+  if (cnt) cnt.textContent = players.length + ' players';
+  if (!players.length) {
+    body.innerHTML = '<tr><td colspan="15" style="text-align:center;padding:20px;color:var(--text-sec);font-family:\'DM Mono\',monospace;font-size:11px">No players found</td></tr>';
+    return;
+  }
+  body.innerHTML = players.map((p, i) => {
+    const rk   = parseInt(p['OWG Rank']) || (i + 1);
+    const cty  = p['Country Code'] || '';
+    const w    = fmtNum(p['Season Wins']);
+    const t10  = fmtNum(p['Top 10s']);
+    const cuts = fmtNum(p['Cuts Made']);
+    const avg  = fmtNum(p['Scoring Avg'], 1);
+    const sgt  = fmtSG(p['SG: Total']);
+    const sga  = fmtSG(p['SG: Approach']);
+    const sarg = fmtSG(p['SG: Around Green']);
+    const sgp  = fmtSG(p['SG: Putting']);
+    const sgo  = fmtSG(p['SG: Off the Tee']);
+    const gir  = fmtNum(p['GIR %'], 1);
+    const drive= fmtNum(p['Driving Distance']);
+    const earn = fmtEarn(p['Career Earnings ($)']);
+    return `<tr class="player-row" data-player="${escHtml(p['Player Name'])}">
+      <td class="rk">${rk}</td>
+      <td class="lft name-cell" style="white-space:nowrap">${p['Player Name']}</td>
+      <td class="mono" style="color:#C9A84C">${cty}</td>
+      <td class="bold">${w}</td>
+      <td>${t10}</td>
+      <td>${cuts}</td>
+      <td class="mono">${avg}</td>
+      <td class="${sgCls(sgt)}">${sgt}</td>
+      <td class="mono" style="color:var(--text-sec)">${sga}</td>
+      <td class="mono" style="color:var(--text-sec)">${sarg}</td>
+      <td class="mono" style="color:var(--text-sec)">${sgp}</td>
+      <td class="mono" style="color:var(--text-sec)">${sgo}</td>
+      <td class="mono">${gir}%</td>
+      <td class="mono">${drive}</td>
+      <td class="mono" style="color:var(--text-sec)">${earn}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── APPLY FILTERS + SORT ──────────────────────────────────────────────
+function applyFilters() {
+  const search = document.getElementById('playerSearch');
+  const q = (search ? search.value : '').toLowerCase().trim();
+  let data = q
+    ? ALL_PLAYERS.filter(p => (p['Player Name'] || '').toLowerCase().includes(q))
+    : [...ALL_PLAYERS];
+
+  if (_sortKey === 'rank')     data.sort((a,b) => (parseInt(a['OWG Rank'])||999) - (parseInt(b['OWG Rank'])||999));
+  if (_sortKey === 'sg')       data.sort((a,b) => (parseFloat(b['SG: Total'])||0) - (parseFloat(a['SG: Total'])||0));
+  if (_sortKey === 'wins')     data.sort((a,b) => (parseFloat(b['Season Wins'])||0) - (parseFloat(a['Season Wins'])||0));
+  if (_sortKey === 'scoring')  data.sort((a,b) => (parseFloat(a['Scoring Avg'])||99) - (parseFloat(b['Scoring Avg'])||99));
+  if (_sortKey === 'earnings') data.sort((a,b) => {
+    const ea = parseFloat(String(b['Career Earnings ($)']).replace(/[$,]/g,'')) || 0;
+    const eb = parseFloat(String(a['Career Earnings ($)']).replace(/[$,]/g,'')) || 0;
+    return ea - eb;
+  });
+  renderPlayersTable(data);
+}
+
+function sortPlayers(key) {
+  _sortKey = key;
+  applyFilters();
+}
+
+// ── PLAYER MODAL ──────────────────────────────────────────────────────
+function openPlayerModal(playerName) {
+  const p = ALL_PLAYERS.find(x => x['Player Name'] === playerName);
+  if (!p) return;
+
+  const name  = p['Player Name'] || '';
+  const parts = name.split(' ');
+  const first = parts[0] || '', last = parts.slice(1).join(' ') || '';
+  const cty   = p['Country Code'] || '';
+  const rank  = parseInt(p['OWG Rank']) || '—';
+
+  const sgaRaw  = parseFloat(p['SG: Approach'])    || 0;
+  const sgpRaw  = parseFloat(p['SG: Putting'])      || 0;
+  const sgoRaw  = parseFloat(p['SG: Off the Tee'])  || 0;
+  const sargRaw = parseFloat(p['SG: Around Green']) || 0;
+
+  const sgt  = fmtSG(p['SG: Total']);
+  const sga  = fmtSG(p['SG: Approach']);
+  const sgp  = fmtSG(p['SG: Putting']);
+  const sgo  = fmtSG(p['SG: Off the Tee']);
+  const sarg = fmtSG(p['SG: Around Green']);
+
+  const pctileRaw = parseFloat(p['SG Total %ile']) || 0;
+  const pctile    = Math.round(pctileRaw);
+  const gaugeOff  = (175.9 * (1 - pctileRaw / 100)).toFixed(1);
+
+  const wins = fmtNum(p['Season Wins']), t10 = fmtNum(p['Top 10s']);
+  const cuts = fmtNum(p['Cuts Made']),  avg  = fmtNum(p['Scoring Avg'], 1);
+  const earn = fmtEarn(p['Career Earnings ($)']);
+  const gir  = fmtNum(p['GIR %'], 1);
+  const drive= fmtNum(p['Driving Distance']);
+  const putts= fmtNum(p['Putts Per Round'], 2);
+
+  const ini = encodeURIComponent((first[0]||'') + (last[0]||''));
+  const photoSrc = p['Photo URL'] || `https://placehold.co/110x140/1A3A2A/C9A84C?text=${ini}`;
+  const barW = v => Math.min(100, Math.max(0, Math.abs(v) / 4 * 100)).toFixed(1);
+  const sgColor = v => v >= 0 ? '#4ade80' : '#f87171';
+
+  const sgBars = [
+    ['SG: Approach',     sga,  sgaRaw],
+    ['SG: Putting',      sgp,  sgpRaw],
+    ['SG: Off the Tee',  sgo,  sgoRaw],
+    ['SG: Around Green', sarg, sargRaw],
+  ];
+
+  const statGrid = [
+    ['W',   wins],
+    ['T10', t10],
+    ['CUT', cuts],
+    ['SCR', avg,  '#C9A84C'],
+    ['RK',  rank],
+  ];
+
+  const extraStats = [
+    ['GIR%',    gir + '%'],
+    ['Drive',   drive],
+    ['Putts/Rd',putts],
+    ['Earnings',earn],
+  ];
+
+  document.getElementById('playerModalContent').innerHTML = `
+    <div class="card-head" style="position:relative;padding-right:44px">
+      <span class="card-title">Player Intelligence</span>
+      <span style="font-size:10px;font-weight:500;color:var(--text);letter-spacing:.06em;font-family:'DM Mono',monospace">${name.toUpperCase()}</span>
+      <button class="modal-close" onclick="closePlayerModal()">✕</button>
+    </div>
+    <div style="position:relative;background:linear-gradient(140deg,#0a150e 0%,#1e4a2e 60%,#0a150e 100%);padding:16px;display:flex;gap:14px;overflow:hidden;flex-wrap:wrap">
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 65% 40%,rgba(201,168,76,.12) 0%,transparent 65%);pointer-events:none"></div>
+      <!-- Photo -->
+      <div style="flex-shrink:0;z-index:1">
+        <img src="${photoSrc}" alt="${name}"
+             style="width:110px;height:140px;object-fit:cover;border-radius:6px;border:2px solid rgba(201,168,76,.35);display:block"
+             onerror="this.src='https://placehold.co/110x140/1A3A2A/C9A84C?text=${ini}'">
+        <div style="margin-top:6px;display:flex;gap:3px;justify-content:center">
+          <span style="background:#2D5A3D;color:#C9A84C;font-size:8px;font-weight:500;padding:1px 5px;border-radius:2px;letter-spacing:.04em;font-family:'DM Mono',monospace">${cty}</span>
+          <span style="background:rgba(42,122,90,.15);color:var(--text-sec);font-size:8px;padding:1px 5px;border-radius:2px;font-family:'DM Mono',monospace">#${rank} WR</span>
+        </div>
+      </div>
+      <!-- Stats -->
+      <div style="flex:1;min-width:200px;z-index:1">
+        <div style="line-height:1;margin-bottom:10px">
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.02em;color:var(--text);font-family:Georgia,serif">${first.toUpperCase()}</div>
+          <div style="font-size:20px;font-weight:700;letter-spacing:-.02em;color:var(--text);font-family:Georgia,serif">${last.toUpperCase()}</div>
+          <div style="font-size:9px;color:var(--text-sec);margin-top:3px">PGA Tour · World No. ${rank}</div>
+        </div>
+        <!-- Gauge + SG Total -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <div class="gauge-wrap">
+            <svg viewBox="0 0 68 68">
+              <circle cx="34" cy="34" r="28" fill="none" stroke="rgba(42,122,90,.2)" stroke-width="6"/>
+              <circle cx="34" cy="34" r="28" fill="none" stroke="#C9A84C" stroke-width="6"
+                      stroke-dasharray="175.9" stroke-dashoffset="${gaugeOff}" stroke-linecap="round"/>
+            </svg>
+            <div class="gauge-val">${pctile}</div>
+          </div>
+          <div>
+            <div style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace">SG: Total</div>
+            <div style="font-size:28px;font-weight:500;color:var(--text);line-height:1;font-family:'DM Mono',monospace">${sgt}</div>
+            <div style="font-size:9px;color:#4ade80;font-weight:500;font-family:'DM Mono',monospace">DataGolf</div>
+            <div style="font-size:9px;color:var(--text-sec);margin-top:2px">${pctile}th Percentile</div>
+          </div>
+        </div>
+        <!-- Stat grid -->
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:10px">
+          ${statGrid.map(([l,v,c]) => `
+          <div style="text-align:center;background:rgba(42,122,90,.1);border-radius:3px;padding:4px 2px">
+            <div style="font-size:8px;color:var(--text-sec);text-transform:uppercase;font-family:'DM Mono',monospace">${l}</div>
+            <div style="font-size:14px;font-weight:500;color:${c||'var(--text)'};font-family:'DM Mono',monospace">${v}</div>
+          </div>`).join('')}
+        </div>
+        <!-- SG Bars -->
+        <div style="display:flex;flex-direction:column;gap:5px">
+          ${sgBars.map(([l,sv,rv]) => `
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-sec);margin-bottom:2px;font-family:'DM Mono',monospace">
+              <span>${l}</span><span style="color:${sgColor(rv)}">${sv}</span>
+            </div>
+            <div style="background:rgba(42,122,90,.12);height:4px;border-radius:2px">
+              <div style="width:${barW(rv)}%;height:100%;background:linear-gradient(90deg,#2A7A5A,#C9A84C);border-radius:2px"></div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <!-- Extra stats row -->
+    <div style="background:var(--bg-secondary);border-top:1px solid var(--border-s);padding:10px 14px">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center">
+        ${extraStats.map(([l,v]) => `
+        <div>
+          <div style="font-size:8px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace;margin-bottom:2px">${l}</div>
+          <div style="font-size:13px;font-weight:500;color:var(--text);font-family:'DM Mono',monospace">${v}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+  `;
+
+  document.getElementById('playerModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closePlayerModal() {
+  document.getElementById('playerModal').classList.remove('open');
+  document.body.style.overflow = '';
 }
 
 // ── BUILDERS ────────────────────────────────────────────────────────
@@ -1077,18 +1525,48 @@ function switchTab(el) {
   el.classList.add('active');
 }
 
-// ── NAV LINKS ────────────────────────────────────────────────────────
-document.querySelectorAll('.nav-link').forEach(l =>
-  l.addEventListener('click', e => {
-    e.preventDefault();
-    document.querySelectorAll('.nav-link').forEach(x => x.classList.remove('active'));
-    l.classList.add('active');
-  })
-);
+// ── ROUTER ───────────────────────────────────────────────────────────
+const ROUTES = {
+  '':               'homeView',
+  'home':           'homeView',
+  'players':        'playersView',
+  'strokes-gained': 'strokesGainedView',
+};
+
+function navigate(hash) {
+  const key = (hash || '').replace(/^#/, '').toLowerCase().split('?')[0];
+  const viewId = ROUTES[key] || 'homeView';
+
+  document.querySelectorAll('.page-view').forEach(v => v.classList.remove('active'));
+  const view = document.getElementById(viewId);
+  if (view) view.classList.add('active');
+
+  // Update nav active state
+  document.querySelectorAll('.nav-link, .nav-drawer a').forEach(l => {
+    l.classList.remove('active');
+    const lhash = (l.getAttribute('href') || '').replace(/^#/, '').toLowerCase();
+    if (lhash === key || (!key && lhash === 'home')) l.classList.add('active');
+  });
+
+  window.scrollTo(0, 0);
+  closePlayerModal();
+}
+
+window.addEventListener('hashchange', () => navigate(location.hash));
 
 // ── INIT ─────────────────────────────────────────────────────────────
 buildTicker();
 loadSheetData();
+navigate(location.hash);
+
+// ── PLAYER TABLE CLICK DELEGATION ────────────────────────────────────
+document.getElementById('allPlayersBody').addEventListener('click', function(e) {
+  const row = e.target.closest('.player-row');
+  if (row && row.dataset.player) openPlayerModal(row.dataset.player);
+});
+
+// ── PLAYER SEARCH ────────────────────────────────────────────────────
+document.getElementById('playerSearch').addEventListener('input', applyFilters);
 
 // ── MOBILE NAV HAMBURGER ──────────────────────────────────────────────
 (function() {
@@ -1100,7 +1578,6 @@ loadSheetData();
     btn.setAttribute('aria-expanded', open);
     btn.textContent = open ? '✕' : '☰';
   });
-  // Close drawer when a link is clicked
   drawer.querySelectorAll('a').forEach(function(link) {
     link.addEventListener('click', function() {
       drawer.classList.remove('open');
@@ -1108,7 +1585,6 @@ loadSheetData();
       btn.textContent = '☰';
     });
   });
-  // Close drawer on outside click
   document.addEventListener('click', function(e) {
     if (!drawer.contains(e.target) && !btn.contains(e.target)) {
       drawer.classList.remove('open');
@@ -1117,6 +1593,11 @@ loadSheetData();
     }
   });
 })();
+
+// ── ESC KEY CLOSES MODAL ─────────────────────────────────────────────
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') closePlayerModal();
+});
 </script>
 
 <footer style="border-top:1px solid var(--border);margin-top:24px;padding:12px 10px;text-align:center;font-size:10px;color:var(--text-sec);font-family:'DM Mono',monospace;letter-spacing:0.04em">
