@@ -497,21 +497,10 @@
             <div style="font-size:17px;font-weight:700;letter-spacing:-.02em;color:var(--text);font-family:Georgia,serif">SCHEFFLER</div>
             <div style="font-size:9px;color:var(--text-sec);margin-top:2px">PGA Tour · World No. 1</div>
           </div>
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-            <div class="gauge-wrap">
-              <svg viewBox="0 0 68 68">
-                <circle cx="34" cy="34" r="28" fill="none" stroke="rgba(42,122,90,.2)" stroke-width="6"/>
-                <circle cx="34" cy="34" r="28" fill="none" stroke="#C9A84C" stroke-width="6"
-                        stroke-dasharray="175.9" stroke-dashoffset="7" stroke-linecap="round"/>
-              </svg>
-              <div class="gauge-val">99</div>
-            </div>
-            <div>
-              <div style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace">SG: Total</div>
-              <div style="font-size:24px;font-weight:500;color:var(--text);line-height:1;font-family:'DM Mono',monospace">+4.81</div>
-              <div style="font-size:9px;color:#4ade80;font-weight:500;font-family:'DM Mono',monospace">+2.3 vs field</div>
-              <div style="font-size:9px;color:var(--text-sec);margin-top:2px">99th Percentile</div>
-            </div>
+          <div style="margin-bottom:8px">
+            <div style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace">SG: Total</div>
+            <div style="font-size:24px;font-weight:500;color:var(--text);line-height:1;font-family:'DM Mono',monospace">+4.81</div>
+            <div style="font-size:9px;color:#4ade80;font-weight:500;font-family:'DM Mono',monospace">+2.3 vs field</div>
           </div>
           <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:8px">
             <div style="text-align:center;background:rgba(42,122,90,.1);border-radius:3px;padding:3px 1px">
@@ -1199,21 +1188,9 @@ function renderPlayerCard(p) {
         <div style="font-size:17px;font-weight:700;letter-spacing:-.02em;color:var(--text);font-family:Georgia,serif">${last.toUpperCase()}</div>
         <div style="font-size:9px;color:var(--text-sec);margin-top:2px">PGA Tour · World No. ${rank}</div>
       </div>
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <div class="gauge-wrap">
-          <svg viewBox="0 0 68 68">
-            <circle cx="34" cy="34" r="28" fill="none" stroke="rgba(42,122,90,.2)" stroke-width="6"/>
-            <circle cx="34" cy="34" r="28" fill="none" stroke="#C9A84C" stroke-width="6"
-                    stroke-dasharray="175.9" stroke-dashoffset="${gaugeOffset}" stroke-linecap="round"/>
-          </svg>
-          <div class="gauge-val">${pctile}</div>
-        </div>
-        <div>
-          <div style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace">SG: Total</div>
-          <div style="font-size:24px;font-weight:500;color:var(--text);line-height:1;font-family:'DM Mono',monospace">${sgt}</div>
-          <div style="font-size:9px;color:#4ade80;font-weight:500;font-family:'DM Mono',monospace">DataGolf</div>
-          <div style="font-size:9px;color:var(--text-sec);margin-top:2px">${pctile}th Percentile</div>
-        </div>
+      <div style="margin-bottom:8px">
+        <div style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace">SG: Total</div>
+        <div style="font-size:24px;font-weight:500;color:var(--text);line-height:1;font-family:'DM Mono',monospace">${sgt}</div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:8px">
         <div style="text-align:center;background:rgba(42,122,90,.1);border-radius:3px;padding:3px 1px">
@@ -1376,6 +1353,7 @@ async function loadSheetData() {
     const players = parseCSV(text);
 
     ALL_PLAYERS = [...players];
+    computeOWGRBenchmark(players);
 
     populateSGView(players);
     populateStatsView(players);
@@ -1570,6 +1548,119 @@ function sortPlayers(key) {
   applyFilters();
 }
 
+// ── OWGR TOP 100 BENCHMARK + RADAR ────────────────────────────────────
+let OWGR_BENCHMARK = null;
+let RADAR_RANGES   = null;
+
+const RADAR_AXES = [
+  { label: 'OTT',   key: 'SG: Off the Tee'  },
+  { label: 'APR',   key: 'SG: Approach'      },
+  { label: 'ARG',   key: 'SG: Around Green'  },
+  { label: 'PUTT',  key: 'SG: Putting'       },
+  { label: 'GIR%',  key: 'GIR %'             },
+  { label: 'DRIVE', key: 'Driving Distance'  },
+];
+
+function computeOWGRBenchmark(players) {
+  const top100 = [...players]
+    .filter(p => parseInt(p['OWG Rank']) > 0)
+    .sort((a, b) => (parseInt(a['OWG Rank'])||999) - (parseInt(b['OWG Rank'])||999))
+    .slice(0, 100);
+  if (!top100.length) return;
+  OWGR_BENCHMARK = {};
+  RADAR_RANGES   = {};
+  RADAR_AXES.forEach(ax => {
+    const vals = top100.map(p => parseFloat(p[ax.key])).filter(v => !isNaN(v));
+    if (!vals.length) { OWGR_BENCHMARK[ax.key] = 0; RADAR_RANGES[ax.key] = {min:0,max:1}; return; }
+    OWGR_BENCHMARK[ax.key] = vals.reduce((a,b) => a+b, 0) / vals.length;
+    RADAR_RANGES[ax.key] = { min: Math.min(...vals), max: Math.max(...vals) };
+  });
+}
+
+function buildRadarSVG(playerObj, benchObj, ranges) {
+  const N  = RADAR_AXES.length;
+  const cx = 140, cy = 130, r = 90;
+  const ao = -Math.PI / 2;
+  const ang  = i => ao + (2 * Math.PI / N) * i;
+  const pt   = (i, rad) => [cx + rad * Math.cos(ang(i)), cy + rad * Math.sin(ang(i))];
+  const norm = (v, mn, mx) => mx === mn ? 0.5 : Math.max(0.05, Math.min(1, (v - mn) / (mx - mn)));
+
+  // Grid rings (4 levels)
+  let rings = '';
+  for (let k = 1; k <= 4; k++) {
+    const rr = r * k / 4;
+    const ps = RADAR_AXES.map((_, i) => pt(i, rr).map(n => n.toFixed(1)).join(',')).join(' ');
+    rings += `<polygon points="${ps}" fill="${k===4?'rgba(0,180,50,.03)':'none'}" stroke="rgba(0,200,50,${k===4?.28:.1})" stroke-width="${k===4?'1':'.5'}"/>`;
+  }
+
+  // Axis lines
+  let axLines = '';
+  for (let i = 0; i < N; i++) {
+    const [x, y] = pt(i, r);
+    axLines += `<line x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" stroke="rgba(0,200,50,.2)" stroke-width=".75"/>`;
+  }
+
+  // Mid-point tick marks on each axis
+  let ticks = '';
+  for (let i = 0; i < N; i++) {
+    const [x, y] = pt(i, r * 0.5);
+    ticks += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.5" fill="rgba(0,200,50,.3)"/>`;
+  }
+
+  // Benchmark polygon (dashed green)
+  const benchPts = benchObj && ranges
+    ? RADAR_AXES.map((ax, i) => {
+        const v   = benchObj[ax.key] || 0;
+        const rng = ranges[ax.key] || {min:0, max:1};
+        return pt(i, r * norm(v, rng.min, rng.max)).map(n => n.toFixed(1)).join(',');
+      }).join(' ')
+    : '';
+
+  // Player polygon (solid gold)
+  const playerPts = RADAR_AXES.map((ax, i) => {
+    const v   = parseFloat(playerObj[ax.key]) || 0;
+    const rng = ranges ? (ranges[ax.key] || {min:0, max:1}) : {min:0, max:1};
+    return pt(i, r * norm(v, rng.min, rng.max)).map(n => n.toFixed(1)).join(',');
+  }).join(' ');
+
+  // Player vertex dots
+  const dots = RADAR_AXES.map((ax, i) => {
+    const v   = parseFloat(playerObj[ax.key]) || 0;
+    const rng = ranges ? (ranges[ax.key] || {min:0, max:1}) : {min:0, max:1};
+    const [dx, dy] = pt(i, r * norm(v, rng.min, rng.max));
+    return `<circle cx="${dx.toFixed(1)}" cy="${dy.toFixed(1)}" r="3.5" fill="#C9A84C" stroke="#061006" stroke-width="1.5"/>`;
+  }).join('');
+
+  // Axis labels: name + player value + benchmark value below
+  let lbls = '';
+  RADAR_AXES.forEach((ax, i) => {
+    const [lx, ly] = pt(i, r + 26);
+    const pv   = parseFloat(playerObj[ax.key]);
+    const bv   = benchObj ? parseFloat(benchObj[ax.key]) : NaN;
+    const fmt  = v => isNaN(v) ? '—' :
+      ax.key.startsWith('SG') ? fmtSG(v) :
+      ax.key === 'GIR %'      ? v.toFixed(1) + '%' :
+      Math.round(v) + '';
+    const vStr = fmt(pv);
+    const bStr = !isNaN(bv) ? fmt(bv) : null;
+    const vClr = ax.key.startsWith('SG') && !isNaN(pv)
+      ? (pv >= 0 ? '#4ade80' : '#f87171')
+      : '#C9A84C';
+    lbls += `<text x="${lx.toFixed(1)}" y="${(ly - 6).toFixed(1)}" text-anchor="middle" fill="rgba(245,240,232,.5)" font-size="8" font-family="DM Mono,monospace" font-weight="500" letter-spacing=".07em">${ax.label}</text>`;
+    lbls += `<text x="${lx.toFixed(1)}" y="${(ly + 5).toFixed(1)}" text-anchor="middle" fill="${vClr}" font-size="9.5" font-family="DM Mono,monospace" font-weight="600">${vStr}</text>`;
+    if (bStr) {
+      lbls += `<text x="${lx.toFixed(1)}" y="${(ly + 15).toFixed(1)}" text-anchor="middle" fill="rgba(42,200,90,.55)" font-size="7" font-family="DM Mono,monospace">${bStr}</text>`;
+    }
+  });
+
+  return `<svg viewBox="0 0 280 276" width="280" height="276" style="overflow:visible;display:block">
+    ${rings}${axLines}${ticks}
+    ${benchPts ? `<polygon points="${benchPts}" fill="rgba(42,122,90,.18)" stroke="rgba(42,200,90,.55)" stroke-width="1.5" stroke-linejoin="round" stroke-dasharray="5 2"/>` : ''}
+    <polygon points="${playerPts}" fill="rgba(201,168,76,.15)" stroke="#C9A84C" stroke-width="2.5" stroke-linejoin="round"/>
+    ${dots}${lbls}
+  </svg>`;
+}
+
 // ── PLAYER MODAL ──────────────────────────────────────────────────────
 function openPlayerModal(playerName) {
   const p = ALL_PLAYERS.find(x => x['Player Name'] === playerName);
@@ -1655,22 +1746,10 @@ function openPlayerModal(playerName) {
           <div style="font-size:20px;font-weight:700;letter-spacing:-.02em;color:var(--text);font-family:Georgia,serif">${last.toUpperCase()}</div>
           <div style="font-size:9px;color:var(--text-sec);margin-top:3px">PGA Tour · World No. ${rank}</div>
         </div>
-        <!-- Gauge + SG Total -->
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-          <div class="gauge-wrap">
-            <svg viewBox="0 0 68 68">
-              <circle cx="34" cy="34" r="28" fill="none" stroke="rgba(42,122,90,.2)" stroke-width="6"/>
-              <circle cx="34" cy="34" r="28" fill="none" stroke="#C9A84C" stroke-width="6"
-                      stroke-dasharray="175.9" stroke-dashoffset="${gaugeOff}" stroke-linecap="round"/>
-            </svg>
-            <div class="gauge-val">${pctile}</div>
-          </div>
-          <div>
-            <div style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace">SG: Total</div>
-            <div style="font-size:28px;font-weight:500;color:var(--text);line-height:1;font-family:'DM Mono',monospace">${sgt}</div>
-            <div style="font-size:9px;color:#4ade80;font-weight:500;font-family:'DM Mono',monospace">DataGolf</div>
-            <div style="font-size:9px;color:var(--text-sec);margin-top:2px">${pctile}th Percentile</div>
-          </div>
+        <!-- SG Total -->
+        <div style="margin-bottom:10px">
+          <div style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace">SG: Total</div>
+          <div style="font-size:28px;font-weight:500;color:var(--text);line-height:1;font-family:'DM Mono',monospace">${sgt}</div>
         </div>
         <!-- Stat grid -->
         <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:10px">
@@ -1702,6 +1781,28 @@ function openPlayerModal(playerName) {
           <div style="font-size:8px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.06em;font-family:'DM Mono',monospace;margin-bottom:2px">${l}</div>
           <div style="font-size:13px;font-weight:500;color:var(--text);font-family:'DM Mono',monospace">${v}</div>
         </div>`).join('')}
+      </div>
+    </div>
+    <!-- Radar: vs. Top 100 OWGR -->
+    <div style="border-top:1px solid var(--border-s);padding:12px 14px;background:linear-gradient(180deg,var(--bg-secondary) 0%,#000 100%)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;gap:10px">
+        <div>
+          <div style="font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--text-acc);font-family:'DM Mono',monospace">Radar · vs. Top 100 OWGR</div>
+          <div style="font-size:9px;color:var(--text-sec);margin-top:2px;line-height:1.4">Performance profile benchmarked against the OWGR top 100 average</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:5px;flex-shrink:0;padding-top:2px">
+          <div style="display:flex;align-items:center;gap:5px;font-size:8px;color:var(--text-sec);font-family:'DM Mono',monospace;white-space:nowrap">
+            <div style="width:14px;height:2px;background:#C9A84C;border-radius:1px"></div>
+            <span>${name.toUpperCase()}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:5px;font-size:8px;color:var(--text-sec);font-family:'DM Mono',monospace;white-space:nowrap">
+            <div style="width:14px;height:2px;background:rgba(42,122,90,.8);border-radius:1px"></div>
+            <span>TOP 100 AVG</span>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:center">
+        ${buildRadarSVG(p, OWGR_BENCHMARK, RADAR_RANGES)}
       </div>
     </div>
   `;
@@ -1817,7 +1918,7 @@ document.addEventListener('keydown', function(e) {
 </script>
 
 <footer style="border-top:1px solid var(--border);margin-top:24px;padding:12px 10px;text-align:center;font-size:10px;color:var(--text-sec);font-family:'DM Mono',monospace;letter-spacing:0.04em">
-  Data sourced from <a href="https://datagolf.com/" target="_blank" rel="noopener" style="color:var(--text-acc);opacity:0.7;transition:opacity 0.15s" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'">DataGolf</a>
+  PGA Tour Statistics
 </footer>
 
 </body>
