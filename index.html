@@ -868,6 +868,153 @@
 </div><!-- /playersView -->
 
 <!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  STATS VIEW                                                        -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div id="statsView" class="page-view">
+<main class="page">
+
+  <!-- Header -->
+  <div style="padding:20px 0 16px;position:relative">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(201,168,76,.05) 0%,transparent 70%);pointer-events:none"></div>
+    <a href="#home" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--text-sec);font-family:'DM Mono',monospace;letter-spacing:.06em;transition:color .2s;margin-bottom:10px;cursor:pointer;text-decoration:none" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">← HOME</a>
+    <h1 style="font-family:Georgia,serif;font-size:clamp(22px,3.5vw,40px);font-weight:700;letter-spacing:-.03em;color:var(--text);position:relative;z-index:1">
+      Stats &amp; <span style="color:#C9A84C">Leaders</span>
+    </h1>
+    <div style="font-size:11px;color:var(--text-sec);margin-top:5px">Top 10 leaders across all major statistical categories</div>
+  </div>
+
+  <!-- Section: Performance -->
+  <div style="font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--text-sec);font-family:'DM Mono',monospace;margin-bottom:8px;padding:0 2px">Performance</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-bottom:18px">
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Scoring Average</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Lowest avg score / round</span>
+      </div>
+      <div style="padding:8px 10px" id="statsScoringChart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Season Wins</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Wins this season</span>
+      </div>
+      <div style="padding:8px 10px" id="statsWinsChart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Top 10 Finishes</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Top 10s this season</span>
+      </div>
+      <div style="padding:8px 10px" id="statsT10Chart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Cuts Made</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Cuts made this season</span>
+      </div>
+      <div style="padding:8px 10px" id="statsCutsChart"></div>
+    </div>
+
+  </div>
+
+  <!-- Section: Ball Striking -->
+  <div style="font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--text-sec);font-family:'DM Mono',monospace;margin-bottom:8px;padding:0 2px">Ball Striking</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-bottom:18px">
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Driving Distance</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Average yards off the tee</span>
+      </div>
+      <div style="padding:8px 10px" id="statsDriveChart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Greens in Regulation</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">GIR percentage</span>
+      </div>
+      <div style="padding:8px 10px" id="statsGIRChart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Putts Per Round</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Fewest putts per round</span>
+      </div>
+      <div style="padding:8px 10px" id="statsPuttsChart"></div>
+    </div>
+
+  </div>
+
+  <!-- Section: Strokes Gained -->
+  <div style="font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--text-sec);font-family:'DM Mono',monospace;margin-bottom:8px;padding:0 2px">Strokes Gained</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-bottom:18px">
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">SG: Total</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Strokes vs. field / round</span>
+      </div>
+      <div style="padding:8px 10px" id="statsSGTotalChart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">SG: Off the Tee</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Tee shot performance</span>
+      </div>
+      <div style="padding:8px 10px" id="statsSGOTTChart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">SG: Approach</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Approach shot performance</span>
+      </div>
+      <div style="padding:8px 10px" id="statsSGAPRChart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">SG: Around Green</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Short game performance</span>
+      </div>
+      <div style="padding:8px 10px" id="statsSGARGChart"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">SG: Putting</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Putting performance</span>
+      </div>
+      <div style="padding:8px 10px" id="statsSGPUTTChart"></div>
+    </div>
+
+  </div>
+
+  <!-- Section: Earnings -->
+  <div style="font-size:9px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--text-sec);font-family:'DM Mono',monospace;margin-bottom:8px;padding:0 2px">Earnings</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:10px;margin-bottom:18px">
+
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Career Earnings</span>
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">Total career prize money</span>
+      </div>
+      <div style="padding:8px 10px" id="statsEarningsChart"></div>
+    </div>
+
+  </div>
+
+</main>
+</div><!-- /statsView -->
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
 <!--  STROKES GAINED VIEW                                              -->
 <!-- ══════════════════════════════════════════════════════════════════ -->
 <div id="strokesGainedView" class="page-view">
@@ -1146,6 +1293,73 @@ function buildSGChart(containerId, players, field) {
   }).join('');
 }
 
+// ── GENERIC STAT LEADER CHART ─────────────────────────────────────────
+function buildStatChart(containerId, players, field, opts) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  const lowerIsBetter = opts && opts.lowerIsBetter;
+  const fmt = opts && opts.fmt;
+  const unit = (opts && opts.unit) || '';
+
+  let sorted = [...players]
+    .filter(p => {
+      const v = parseFloat(String(p[field] || '').replace(/[$,]/g, ''));
+      return !isNaN(v) && v > 0;
+    })
+    .sort((a, b) => {
+      const va = parseFloat(String(a[field] || '').replace(/[$,]/g, '')) || 0;
+      const vb = parseFloat(String(b[field] || '').replace(/[$,]/g, '')) || 0;
+      return lowerIsBetter ? va - vb : vb - va;
+    })
+    .slice(0, 10);
+
+  if (!sorted.length) { el.innerHTML = '<div style="color:var(--text-sec);font-size:11px;padding:8px">No data</div>'; return; }
+
+  const bestVal = parseFloat(String(sorted[0][field] || '').replace(/[$,]/g, '')) || 1;
+  const worstVal = parseFloat(String(sorted[sorted.length - 1][field] || '').replace(/[$,]/g, '')) || 0;
+
+  el.innerHTML = sorted.map((p, i) => {
+    const raw = parseFloat(String(p[field] || '').replace(/[$,]/g, '')) || 0;
+    let pct;
+    if (lowerIsBetter) {
+      const range = worstVal - bestVal || 1;
+      pct = Math.max(10, 100 - ((raw - bestVal) / range) * 85);
+    } else {
+      pct = Math.max(2, (raw / bestVal) * 100);
+    }
+    const color = BAR_COLORS[i] || '#4a9a7a';
+    const display = fmt ? fmt(raw) : (raw % 1 !== 0 ? raw.toFixed(2) : String(raw)) + unit;
+    return `<div class="bar-row">
+      <div class="bar-label" style="display:flex;align-items:center;gap:4px">
+        <span style="background:var(--row-num);color:var(--text-sec);font-size:9px;font-family:'DM Mono',monospace;min-width:16px;text-align:center;border-radius:2px;flex-shrink:0">${i + 1}</span>
+        <span style="font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p['Player Name']}</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct.toFixed(1)}%;background:${color}"></div></div>
+      <div class="bar-val" style="color:${color}">${display}</div>
+    </div>`;
+  }).join('');
+}
+
+function populateStatsView(players) {
+  // Performance
+  buildStatChart('statsScoringChart', players, 'Scoring Avg',       { lowerIsBetter: true,  fmt: v => v.toFixed(2) });
+  buildStatChart('statsWinsChart',    players, 'Season Wins',        { fmt: v => String(Math.round(v)) });
+  buildStatChart('statsT10Chart',     players, 'Top 10s',            { fmt: v => String(Math.round(v)) });
+  buildStatChart('statsCutsChart',    players, 'Cuts Made',          { fmt: v => String(Math.round(v)) });
+  // Ball striking
+  buildStatChart('statsDriveChart',   players, 'Driving Distance',   { fmt: v => Math.round(v) + ' yds' });
+  buildStatChart('statsGIRChart',     players, 'GIR %',              { fmt: v => v.toFixed(1) + '%' });
+  buildStatChart('statsPuttsChart',   players, 'Putts Per Round',    { lowerIsBetter: true, fmt: v => v.toFixed(2) });
+  // Strokes gained
+  buildSGChart('statsSGTotalChart',   players, 'SG: Total');
+  buildSGChart('statsSGOTTChart',     players, 'SG: Off the Tee');
+  buildSGChart('statsSGAPRChart',     players, 'SG: Approach');
+  buildSGChart('statsSGARGChart',     players, 'SG: Around Green');
+  buildSGChart('statsSGPUTTChart',    players, 'SG: Putting');
+  // Earnings
+  buildStatChart('statsEarningsChart', players, 'Career Earnings ($)', { fmt: v => fmtEarn(String(v)) });
+}
+
 function populateSGView(players) {
   buildSGChart('sgTotalChart', players, 'SG: Total');
   buildSGChart('sgOTTChart',   players, 'SG: Off the Tee');
@@ -1164,6 +1378,7 @@ async function loadSheetData() {
     ALL_PLAYERS = [...players];
 
     populateSGView(players);
+    populateStatsView(players);
 
     const byRank = [...players].sort((a, b) => (parseInt(a['OWG Rank']) || 999) - (parseInt(b['OWG Rank']) || 999));
     const bySG   = [...players].sort((a, b) => (parseFloat(b['SG: Total']) || 0) - (parseFloat(a['SG: Total']) || 0));
@@ -1530,6 +1745,7 @@ const ROUTES = {
   '':               'homeView',
   'home':           'homeView',
   'players':        'playersView',
+  'stats':          'statsView',
   'strokes-gained': 'strokesGainedView',
 };
 
