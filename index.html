@@ -428,7 +428,7 @@
   <a class="nav-link active" href="#home">Home</a>
   <a class="nav-link" href="#tour">Tour</a>
   <a class="nav-link" href="#players">Players</a>
-  <a class="nav-link" href="#courses">Courses</a>
+  <a class="nav-link" href="#schedule">Schedule</a>
   <a class="nav-link" href="#stats">Stats</a>
   <a class="nav-link" href="#strokes-gained">Strokes Gained</a>
   <a class="nav-link" href="#dashboards">Dashboards</a>
@@ -445,7 +445,7 @@
   <a class="active" href="#home">Home</a>
   <a href="#tour">Tour</a>
   <a href="#players">Players</a>
-  <a href="#courses">Courses</a>
+  <a href="#schedule">Schedule</a>
   <a href="#stats">Stats</a>
   <a href="#strokes-gained">Strokes Gained</a>
   <a href="#dashboards">Dashboards</a>
@@ -603,12 +603,15 @@
       <div class="card-head">
         <span class="card-title">Tour Stats Leaderboard</span>
         <div class="tabs">
-          <button class="tab active" onclick="switchTab(this)">SG: Total</button>
-          <button class="tab" onclick="switchTab(this)">SG: APR</button>
-          <button class="tab" onclick="switchTab(this)">SG: Putting</button>
-          <button class="tab" onclick="switchTab(this)">SG: OTT</button>
-          <button class="tab" onclick="switchTab(this)">Scoring Avg</button>
-          <button class="tab" onclick="switchTab(this)">Driving</button>
+          <button class="tab active" onclick="switchLeadTab(this,'sg-total')">SG: Total</button>
+          <button class="tab" onclick="switchLeadTab(this,'sg-apr')">SG: APR</button>
+          <button class="tab" onclick="switchLeadTab(this,'sg-arg')">SG: ARG</button>
+          <button class="tab" onclick="switchLeadTab(this,'sg-putt')">SG: Putting</button>
+          <button class="tab" onclick="switchLeadTab(this,'sg-ott')">SG: OTT</button>
+          <button class="tab" onclick="switchLeadTab(this,'scoring')">Scoring Avg</button>
+          <button class="tab" onclick="switchLeadTab(this,'gir')">GIR%</button>
+          <button class="tab" onclick="switchLeadTab(this,'putts')">Putts/Rnd</button>
+          <button class="tab" onclick="switchLeadTab(this,'driving')">Driving</button>
         </div>
       </div>
       <div style="background:var(--bg-secondary);padding:4px 10px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--border);flex-wrap:wrap">
@@ -629,7 +632,7 @@
       <div style="overflow-x:auto">
         <table class="dt">
           <thead>
-            <tr>
+            <tr id="leadThead">
               <th class="lft">RK</th>
               <th class="lft" style="min-width:150px">PLAYER</th>
               <th>CTY</th>
@@ -773,7 +776,7 @@
     <div style="margin-bottom:4px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 16px">
       <a href="#home" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Home</a>
       <a href="#players" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Players</a>
-      <a href="#courses" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Courses</a>
+      <a href="#schedule" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Schedule</a>
       <a href="#leaderboard" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Standings</a>
       <a href="#stats" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Stats</a>
       <a href="#strokes-gained" style="color:var(--text-sec);transition:color .2s" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">Strokes Gained</a>
@@ -1075,6 +1078,61 @@
 
 </main>
 </div><!-- /strokesGainedView -->
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  SCHEDULE VIEW                                                     -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div id="scheduleView" class="page-view">
+<main class="page">
+
+  <!-- Header -->
+  <div style="padding:20px 0 16px;position:relative">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(201,168,76,.05) 0%,transparent 70%);pointer-events:none"></div>
+    <a href="#home" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--text-sec);font-family:'DM Mono',monospace;letter-spacing:.06em;transition:color .2s;margin-bottom:10px;cursor:pointer;text-decoration:none" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">← HOME</a>
+    <h1 style="font-family:Georgia,serif;font-size:clamp(22px,3.5vw,40px);font-weight:700;letter-spacing:-.03em;color:var(--text);position:relative;z-index:1">
+      Tour <span style="color:#C9A84C">Schedule</span>
+    </h1>
+    <div style="font-size:11px;color:var(--text-sec);margin-top:5px">Full season schedules for all major professional tours</div>
+  </div>
+
+  <!-- Schedule Card -->
+  <div class="card" style="margin-bottom:10px">
+    <div class="card-head" style="flex-wrap:wrap;gap:8px">
+      <span class="card-title" id="scheduleCardTitle">2024–25 Schedule</span>
+      <div class="tabs" id="scheduleTourTabs">
+        <button class="tab active" onclick="switchTab(this);loadSchedule('pga')">PGA Tour</button>
+        <button class="tab" onclick="switchTab(this);loadSchedule('euro')">DP World</button>
+        <button class="tab" onclick="switchTab(this);loadSchedule('kft')">Korn Ferry</button>
+        <button class="tab" onclick="switchTab(this);loadSchedule('liv')">LIV Golf</button>
+      </div>
+    </div>
+    <div id="scheduleTableWrap" style="overflow-x:auto">
+      <table class="dt">
+        <thead id="scheduleTableHead">
+          <tr>
+            <th class="lft" style="width:28px">#</th>
+            <th class="lft" style="min-width:200px">EVENT</th>
+            <th class="lft" style="min-width:170px">COURSE</th>
+            <th class="lft" style="min-width:130px">LOCATION</th>
+            <th style="min-width:100px">DATE</th>
+            <th style="min-width:80px">STATUS</th>
+            <th class="lft" style="min-width:160px">WINNER</th>
+          </tr>
+        </thead>
+        <tbody id="scheduleBody">
+          <tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-sec);font-family:'DM Mono',monospace;font-size:11px">Loading schedule…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align:center;padding:14px 0;color:var(--text-sec);font-size:9px;border-top:1px solid var(--border)">
+    <div>© 2026 LinksData Lab · The Science Behind the Swing. · Schedule data via DataGolf API.</div>
+  </div>
+
+</main>
+</div><!-- /scheduleView -->
 
 <!-- ── PLAYER MODAL ─────────────────────────────────────────────── -->
 <div id="playerModal" onclick="if(event.target===this)closePlayerModal()">
@@ -1433,36 +1491,7 @@ async function loadSheetData() {
     }).join('');
 
     // ── Leaderboard table ──────────────────────────────────────────
-    document.getElementById('leaderboardBody').innerHTML = bySG.slice(0, 20).map((p, i) => {
-      const cty   = p['Country Code'] || '';
-      const w     = fmtNum(p['Season Wins']);
-      const sgt   = fmtSG(p['SG: Total']), sga = fmtSG(p['SG: Approach']);
-      const sarg  = fmtSG(p['SG: Around Green']), sgp = fmtSG(p['SG: Putting']);
-      const sgo   = fmtSG(p['SG: Off the Tee']);
-      const avg   = fmtNum(p['Scoring Avg'], 1);
-      const gir   = fmtNum(p['GIR %'], 1);
-      const putts = fmtNum(p['Putts Per Round'], 2);
-      const drive = fmtNum(p['Driving Distance']);
-      const earn  = fmtEarn(p['Career Earnings ($)']);
-      return `<tr>
-        <td class="rk">${i + 1}</td>
-        <td class="lft bold" style="white-space:nowrap">${p['Player Name']}</td>
-        <td class="mono" style="color:#C9A84C">${cty}</td>
-        <td class="mono">—</td>
-        <td>—</td>
-        <td>${w}</td>
-        <td class="${sgCls(sgt)}">${sgt}</td>
-        <td class="mono" style="color:var(--text-sec)">${sga}</td>
-        <td class="mono" style="color:var(--text-sec)">${sarg}</td>
-        <td class="mono" style="color:var(--text-sec)">${sgp}</td>
-        <td class="mono" style="color:var(--text-sec)">${sgo}</td>
-        <td class="mono">${avg}</td>
-        <td class="mono">${gir}%</td>
-        <td class="mono">${putts}</td>
-        <td class="mono">${drive}</td>
-        <td class="mono" style="color:var(--text-sec)">${earn}</td>
-      </tr>`;
-    }).join('');
+    renderLeaderboard();
 
     // ── Field Builder roster ───────────────────────────────────────
     document.getElementById('rosterList').innerHTML = bySG.slice(1, 7).map((p, i) => `
@@ -1874,6 +1903,158 @@ function switchTab(el) {
   el.classList.add('active');
 }
 
+// ── LEADERBOARD TAB CONFIG ────────────────────────────────────────────
+const LEAD_TABS = {
+  'sg-total': { key: 'SG: Total',        colIdx: 6,  asc: false },
+  'sg-apr':   { key: 'SG: Approach',     colIdx: 7,  asc: false },
+  'sg-arg':   { key: 'SG: Around Green', colIdx: 8,  asc: false },
+  'sg-putt':  { key: 'SG: Putting',      colIdx: 9,  asc: false },
+  'sg-ott':   { key: 'SG: Off the Tee',  colIdx: 10, asc: false },
+  'scoring':  { key: 'Scoring Avg',      colIdx: 11, asc: true  },
+  'gir':      { key: 'GIR %',            colIdx: 12, asc: false },
+  'putts':    { key: 'Putts Per Round',  colIdx: 13, asc: true  },
+  'driving':  { key: 'Driving Distance', colIdx: 14, asc: false },
+};
+let _leadStat = 'sg-total';
+
+function switchLeadTab(el, stat) {
+  switchTab(el);
+  _leadStat = stat;
+  renderLeaderboard();
+}
+
+function renderLeaderboard() {
+  if (!ALL_PLAYERS.length) return;
+  const cfg = LEAD_TABS[_leadStat] || LEAD_TABS['sg-total'];
+
+  const sorted = [...ALL_PLAYERS].sort((a, b) => {
+    const va = parseFloat(a[cfg.key]) || (cfg.asc ? 9999 : -9999);
+    const vb = parseFloat(b[cfg.key]) || (cfg.asc ? 9999 : -9999);
+    return cfg.asc ? va - vb : vb - va;
+  });
+
+  // Update sorted column header
+  const thead = document.getElementById('leadThead');
+  if (thead) {
+    thead.querySelectorAll('th').forEach((th, i) => {
+      th.classList.toggle('sorted', i === cfg.colIdx);
+    });
+  }
+
+  const isSGCol = cfg.colIdx >= 6 && cfg.colIdx <= 10;
+  document.getElementById('leaderboardBody').innerHTML = sorted.slice(0, 20).map((p, i) => {
+    const cty   = p['Country Code'] || '';
+    const w     = fmtNum(p['Season Wins']);
+    const sgt   = fmtSG(p['SG: Total']);
+    const sga   = fmtSG(p['SG: Approach']);
+    const sarg  = fmtSG(p['SG: Around Green']);
+    const sgp   = fmtSG(p['SG: Putting']);
+    const sgo   = fmtSG(p['SG: Off the Tee']);
+    const avg   = fmtNum(p['Scoring Avg'], 1);
+    const gir   = fmtNum(p['GIR %'], 1);
+    const putts = fmtNum(p['Putts Per Round'], 2);
+    const drive = fmtNum(p['Driving Distance']);
+    const earn  = fmtEarn(p['Career Earnings ($)']);
+
+    function tdCell(val, colIdx, baseCls) {
+      const isActive = colIdx === cfg.colIdx;
+      return `<td class="${isActive ? 'acc' : baseCls}">${val}</td>`;
+    }
+
+    return `<tr>
+      <td class="rk">${i + 1}</td>
+      <td class="lft bold" style="white-space:nowrap">${p['Player Name']}</td>
+      <td class="mono" style="color:#C9A84C">${cty}</td>
+      <td class="mono">—</td>
+      <td>—</td>
+      <td>${w}</td>
+      ${tdCell(sgt,   6,  sgCls(sgt))}
+      ${tdCell(sga,   7,  sgCls(sga))}
+      ${tdCell(sarg,  8,  sgCls(sarg))}
+      ${tdCell(sgp,   9,  sgCls(sgp))}
+      ${tdCell(sgo,   10, sgCls(sgo))}
+      ${tdCell(avg,   11, 'mono')}
+      ${tdCell(gir+'%', 12, 'mono')}
+      ${tdCell(putts, 13, 'mono')}
+      ${tdCell(drive, 14, 'mono')}
+      <td class="mono" style="color:var(--text-sec)">${earn}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── SCHEDULE (DataGolf) ──────────────────────────────────────────────
+const scheduleCache = {};
+let scheduleInitialized = false;
+
+const TOUR_LABELS = { pga: 'PGA Tour', euro: 'DP World Tour', kft: 'Korn Ferry Tour', liv: 'LIV Golf' };
+
+function fmtScheduleDate(d) {
+  if (!d) return '—';
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const [,m,day] = d.split('-');
+  return months[+m-1] + ' ' + +day;
+}
+
+function fmtWinner(w) {
+  if (!w) return '—';
+  // Strip trailing " (ID)" if present: "Gotterup, Chris (27774)" → "Gotterup, Chris"
+  return w.replace(/\s*\(\d+\)\s*$/, '');
+}
+
+function statusBadge(status) {
+  if (status === 'completed') return `<span style="color:var(--text-sec);font-size:10px;font-family:'DM Mono',monospace">DONE</span>`;
+  if (status === 'live')      return `<span style="background:rgba(201,168,76,.2);color:#C9A84C;font-size:9px;font-family:'DM Mono',monospace;padding:1px 6px;border-radius:2px;letter-spacing:.04em">LIVE</span>`;
+  return `<span style="color:rgba(0,200,50,.7);font-size:10px;font-family:'DM Mono',monospace">UPCOMING</span>`;
+}
+
+function renderSchedule(data, tour) {
+  const body  = document.getElementById('scheduleBody');
+  const title = document.getElementById('scheduleCardTitle');
+  const events = Array.isArray(data) ? data : (data.schedule || []);
+
+  if (title) title.textContent = (TOUR_LABELS[tour] || tour) + ' Schedule';
+
+  if (!events.length) {
+    body.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-sec);font-family:'DM Mono',monospace;font-size:11px">No events found.</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = events.map((e, i) => {
+    const isLive      = e.status === 'live';
+    const isCompleted = e.status === 'completed';
+    const rowStyle    = isLive ? 'background:rgba(201,168,76,.07);' : isCompleted ? 'opacity:0.45;' : '';
+    const winner      = fmtWinner(e.winner);
+
+    return `<tr style="${rowStyle}">
+      <td class="lft" style="font-family:'DM Mono',monospace;color:var(--text-sec)">${i+1}</td>
+      <td class="lft" style="font-weight:500">${e.event_name||'—'}</td>
+      <td class="lft" style="color:var(--text-sec)">${e.course||'—'}</td>
+      <td class="lft" style="color:var(--text-sec);font-size:11px">${e.location||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px;white-space:nowrap">${fmtScheduleDate(e.start_date)}</td>
+      <td style="text-align:center">${statusBadge(e.status)}</td>
+      <td class="lft" style="font-size:11px;color:var(--text-sec)">${winner !== '—' ? winner : ''}</td>
+    </tr>`;
+  }).join('');
+}
+
+async function loadSchedule(tour) {
+  const body = document.getElementById('scheduleBody');
+  if (scheduleCache[tour]) { renderSchedule(scheduleCache[tour], tour); return; }
+
+  body.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-sec);font-family:'DM Mono',monospace;font-size:11px">Loading schedule…</td></tr>`;
+
+  try {
+    const res  = await fetch(`/api/schedule?tour=${tour}`);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    scheduleCache[tour] = data;
+    renderSchedule(data, tour);
+  } catch (err) {
+    body.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:#e05252;font-family:'DM Mono',monospace;font-size:11px">Failed to load schedule — ${err.message}</td></tr>`;
+    console.error('Schedule fetch error:', err);
+  }
+}
+
 // ── ROUTER ───────────────────────────────────────────────────────────
 const ROUTES = {
   '':               'homeView',
@@ -1881,6 +2062,7 @@ const ROUTES = {
   'players':        'playersView',
   'stats':          'statsView',
   'strokes-gained': 'strokesGainedView',
+  'schedule':       'scheduleView',
 };
 
 function navigate(hash) {
@@ -1900,6 +2082,11 @@ function navigate(hash) {
 
   window.scrollTo(0, 0);
   closePlayerModal();
+
+  if (viewId === 'scheduleView' && !scheduleInitialized) {
+    scheduleInitialized = true;
+    loadSchedule('pga');
+  }
 }
 
 window.addEventListener('hashchange', () => navigate(location.hash));

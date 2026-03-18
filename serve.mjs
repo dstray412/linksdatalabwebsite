@@ -1,10 +1,12 @@
 import http from 'http';
+import https from 'https';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3000;
+const DG_KEY = '686d0eb03340ee5559d7415e8723';
 
 const MIME = {
   '.html': 'text/html',
@@ -23,11 +25,35 @@ const MIME = {
   '.ttf':  'font/ttf',
 };
 
-const server = http.createServer((req, res) => {
-  let urlPath = req.url.split('?')[0];
-  if (urlPath === '/') urlPath = '/index.html';
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET',
+};
 
-  const filePath = path.join(__dirname, urlPath);
+const server = http.createServer((req, res) => {
+  const parsed  = new URL(req.url, `http://localhost:${PORT}`);
+  const urlPath = parsed.pathname;
+
+  // ── DataGolf proxy ───────────────────────────────────────────────
+  if (urlPath === '/api/schedule') {
+    const tour = parsed.searchParams.get('tour') || 'pga';
+    const dgUrl = `https://feeds.datagolf.com/get-schedule?tour=${encodeURIComponent(tour)}&file_format=json&key=${DG_KEY}`;
+    https.get(dgUrl, (dgRes) => {
+      let body = '';
+      dgRes.on('data', chunk => body += chunk);
+      dgRes.on('end', () => {
+        res.writeHead(dgRes.statusCode, { 'Content-Type': 'application/json', ...CORS_HEADERS });
+        res.end(body);
+      });
+    }).on('error', err => {
+      res.writeHead(502, { 'Content-Type': 'application/json', ...CORS_HEADERS });
+      res.end(JSON.stringify({ error: err.message }));
+    });
+    return;
+  }
+
+  // ── Static files ─────────────────────────────────────────────────
+  const filePath = path.join(__dirname, urlPath === '/' ? '/index.html' : urlPath);
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME[ext] || 'application/octet-stream';
 
