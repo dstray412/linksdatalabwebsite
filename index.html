@@ -2044,7 +2044,7 @@ async function loadSchedule(tour) {
   body.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-sec);font-family:'DM Mono',monospace;font-size:11px">Loading schedule…</td></tr>`;
 
   try {
-    const res  = await fetch(`/api/schedule?tour=${tour}`);
+    const res  = await fetch(`https://feeds.datagolf.com/get-schedule?tour=${tour}&file_format=json&key=686d0eb03340ee5559d7415e8723`);
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     scheduleCache[tour] = data;
