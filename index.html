@@ -275,12 +275,15 @@
       top: 44px;
       left: 0;
       right: 0;
+      bottom: 0;
       background: #0a150e;
       border-bottom: 1px solid var(--border-s);
       z-index: 48;
       flex-direction: column;
       padding: 6px 0;
       box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
     .nav-drawer.open { display: flex; }
     .nav-drawer a {
