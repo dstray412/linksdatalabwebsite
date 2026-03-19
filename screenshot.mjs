@@ -11,9 +11,10 @@ if (!fs.existsSync(SCREENSHOTS_DIR)) {
   fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
 }
 
-// Args: node screenshot.mjs <url> [label]
+// Args: node screenshot.mjs <url> [label] [width]
 const url   = process.argv[2] || 'http://localhost:3000';
 const label = process.argv[3] || '';
+const viewportWidth = parseInt(process.argv[4]) || 1440;
 
 // Auto-increment filename, never overwrite
 function nextFilename() {
@@ -39,7 +40,7 @@ function nextFilename() {
   });
 
   const page = await browser.newPage();
-  await page.setViewport({ width: 1440, height: 900, deviceScaleFactor: 2 });
+  await page.setViewport({ width: viewportWidth, height: 900, deviceScaleFactor: 2 });
   await page.goto(url, { waitUntil: 'networkidle2', timeout: 30000 });
 
   // Let web fonts finish rendering

@@ -403,6 +403,17 @@
       .card-head { flex-wrap: wrap; gap: 6px; }
       #playerModal { padding: 10px; }
       #playerModal .modal-box { max-height: 94vh; }
+      /* This Week on Tour — collapse to single column */
+      #thisWeekBody { grid-template-columns: 1fr !important; gap: 14px !important; }
+      #thisWeekInfo { border-right: none !important; padding-right: 0 !important; border-bottom: 1px solid var(--border); padding-bottom: 14px !important; }
+      /* Field Builder hero — fix row-layout width and name grouping */
+      #fieldHero { width: auto !important; flex: 1; }
+      .field-hero-info { margin-top: 0 !important; }
+      /* Schedule — hide COURSE and LOCATION columns on mobile */
+      #scheduleTableHead tr th:nth-child(3),
+      #scheduleTableHead tr th:nth-child(4),
+      #scheduleBody tr td:nth-child(3),
+      #scheduleBody tr td:nth-child(4) { display: none !important; }
     }
 
     @media (max-width: 480px) {
@@ -1964,8 +1975,10 @@ function renderFieldHero(player) {
         <span style="font-size:12px;font-weight:500;color:#C9A84C;font-family:'DM Mono',monospace">${sg}</span>
       </div>
     </div>
-    <div style="margin-top:20px;font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(name)}</div>
-    <div style="font-size:9px;color:var(--text-sec)">${cty} · WR #${rank}</div>`;
+    <div class="field-hero-info" style="margin-top:20px">
+      <div style="font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(name)}</div>
+      <div style="font-size:9px;color:var(--text-sec)">${cty} · WR #${rank}</div>
+    </div>`;
 }
 
 function renderFieldLineupBar() {
