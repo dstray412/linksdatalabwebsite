@@ -2077,15 +2077,19 @@ async function loadSchedule(tour) {
       scheduleAllRows = parseScheduleCSV(await res.text());
     }
 
-    const rows = scheduleAllRows.filter(r => r.tour === tour).map(r => ({
-      event_name:  r.event_name,
-      course:      r.course,
-      location:    r.location,
-      start_date:  r.start_date,
-      status:      r.status,
-      first_name:  r.winner_first,
-      last_name:   r.winner_last,
-    }));
+    const rows = scheduleAllRows.filter(r => r.tour === tour).map(r => {
+      const wFirst = (r.winner_first || '').trim();
+      const wLast  = (r.winner_last  || '').trim();
+      const winner = wFirst && wLast ? `${wFirst} ${wLast}` : (wLast || wFirst || '');
+      return {
+        event_name: r.event_name,
+        course:     r.course,
+        location:   r.location,
+        start_date: r.start_date,
+        status:     r.status,
+        winner,
+      };
+    });
 
     scheduleCache[tour] = rows;
     renderSchedule(rows, tour);
