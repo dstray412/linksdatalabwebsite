@@ -1143,7 +1143,10 @@
 
 <script>
 // ── SHEET CONFIG ─────────────────────────────────────────────────────
-const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSylaosRuMINmbrvu9QaO22slqmpL822Ay-jD6qguwVVFoFb4cqajl5MHb1r5qVffTXDbMf_FLh7Gc-/pub?gid=399338361&single=true&output=csv';
+const SHEET_CSV     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSylaosRuMINmbrvu9QaO22slqmpL822Ay-jD6qguwVVFoFb4cqajl5MHb1r5qVffTXDbMf_FLh7Gc-/pub?gid=399338361&single=true&output=csv';
+// After running syncSchedule() in Apps Script, publish the 2026_schedule tab
+// and paste its CSV URL here (File > Share > Publish to web > 2026_schedule tab > CSV)
+const SCHEDULE_CSV  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSylaosRuMINmbrvu9QaO22slqmpL822Ay-jD6qguwVVFoFb4cqajl5MHb1r5qVffTXDbMf_FLh7Gc-/pub?gid=803514839&single=true&output=csv';
 
 // ── TICKER DATA (static) ─────────────────────────────────────────────
 const GAMES = [
@@ -2037,6 +2040,27 @@ function renderSchedule(data, tour) {
   }).join('');
 }
 
+// Parses the flat Schedule tab CSV (row 0 = headers, rows 1+ = data)
+function parseScheduleCSV(text) {
+  const lines = text.trim().split(/\r?\n/);
+  const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+  return lines.slice(1).map(line => {
+    const fields = [];
+    let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      if (line[i] === '"') { inQ = !inQ; continue; }
+      if (line[i] === ',' && !inQ) { fields.push(cur); cur = ''; }
+      else cur += line[i];
+    }
+    fields.push(cur);
+    const obj = {};
+    headers.forEach((h, i) => { obj[h] = (fields[i] || '').trim(); });
+    return obj;
+  }).filter(r => r.event_name);
+}
+
+let scheduleAllRows = null; // all tours loaded once
+
 async function loadSchedule(tour) {
   const body = document.getElementById('scheduleBody');
   if (scheduleCache[tour]) { renderSchedule(scheduleCache[tour], tour); return; }
@@ -2044,12 +2068,27 @@ async function loadSchedule(tour) {
   body.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:var(--text-sec);font-family:'DM Mono',monospace;font-size:11px">Loading schedule…</td></tr>`;
 
   try {
-    const dgUrl = `https://feeds.datagolf.com/get-schedule?tour=${tour}&file_format=json&key=686d0eb03340ee5559d7415e8723`;
-    const res  = await fetch(`https://corsproxy.io/?url=${encodeURIComponent(dgUrl)}`);
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    scheduleCache[tour] = data;
-    renderSchedule(data, tour);
+    if (!SCHEDULE_CSV) throw new Error('SCHEDULE_CSV not configured');
+
+    // Fetch all rows once, then cache by tour
+    if (!scheduleAllRows) {
+      const res = await fetch(SCHEDULE_CSV);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      scheduleAllRows = parseScheduleCSV(await res.text());
+    }
+
+    const rows = scheduleAllRows.filter(r => r.tour === tour).map(r => ({
+      event_name:  r.event_name,
+      course:      r.course,
+      location:    r.location,
+      start_date:  r.start_date,
+      status:      r.status,
+      first_name:  r.winner_first,
+      last_name:   r.winner_last,
+    }));
+
+    scheduleCache[tour] = rows;
+    renderSchedule(rows, tour);
   } catch (err) {
     body.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:24px;color:#e05252;font-family:'DM Mono',monospace;font-size:11px">Failed to load schedule — ${err.message}</td></tr>`;
     console.error('Schedule fetch error:', err);
