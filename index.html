@@ -686,6 +686,37 @@
     </div>
   </div>
 
+  <!-- COURSE FIT RANKINGS -->
+  <div id="courseFitCard" class="card" style="margin-bottom:10px;display:none">
+    <div class="card-head" style="flex-wrap:wrap;gap:8px">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <span class="card-title">Course Fit Rankings</span>
+        <span id="courseFitEvent" style="font-size:10px;color:var(--text-sec);font-family:'DM Mono',monospace;padding:2px 6px;border:1px solid var(--border);border-radius:3px"></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace">60% form · 40% course history</span>
+        <span id="courseFitGenerated" style="font-size:9px;color:rgba(245,240,232,.3);font-family:'DM Mono',monospace"></span>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table class="dt">
+        <thead>
+          <tr>
+            <th class="lft" style="width:24px">RK</th>
+            <th class="lft" style="min-width:160px">PLAYER</th>
+            <th class="sorted">SCORE</th>
+            <th>SG %</th>
+            <th>CRS %</th>
+            <th>APPS</th>
+            <th>BEST</th>
+            <th>HISTORY</th>
+          </tr>
+        </thead>
+        <tbody id="courseFitBody"></tbody>
+      </table>
+    </div>
+  </div>
+
   <!-- PROMO BANNER -->
   <div class="promo-banner" style="background:linear-gradient(135deg,#0a150e 0%,#1e4a2e 100%);border:1px solid var(--border-s);border-radius:6px;padding:12px 18px;margin-bottom:10px;display:flex;align-items:center;gap:16px;overflow:hidden;position:relative">
     <div style="position:absolute;inset:0;background:radial-gradient(circle at 20% 50%,rgba(201,168,76,.07) 0%,transparent 60%);pointer-events:none"></div>
@@ -1157,6 +1188,7 @@ const SCHEDULE_CSV  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSylaosRu
 // After running event_history_sync.py, publish the new tabs and paste their CSV URLs here:
 const EVENT_HISTORY_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSylaosRuMINmbrvu9QaO22slqmpL822Ay-jD6qguwVVFoFb4cqajl5MHb1r5qVffTXDbMf_FLh7Gc-/pub?gid=449903691&single=true&output=csv';
 const EVENT_TOP10_CSV   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSylaosRuMINmbrvu9QaO22slqmpL822Ay-jD6qguwVVFoFb4cqajl5MHb1r5qVffTXDbMf_FLh7Gc-/pub?gid=1900583655&single=true&output=csv';
+const COURSE_FIT_CSV    = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSylaosRuMINmbrvu9QaO22slqmpL822Ay-jD6qguwVVFoFb4cqajl5MHb1r5qVffTXDbMf_FLh7Gc-/pub?gid=1747301573&single=true&output=csv';
 
 // ── TICKER DATA (static) ─────────────────────────────────────────────
 const GAMES = [
@@ -1182,6 +1214,11 @@ let ALL_PLAYERS = [];
 let _sortKey    = 'rank';
 let pcPlayerList  = [];
 let pcPlayerIndex = 0;
+let COURSE_FIT_DATA    = [];
+let COURSE_FIT_MAP     = {}; // lowercase player_name → row (for active event)
+let COURSE_FIT_ALL     = {}; // event_name → [rows]  (all events)
+let COURSE_FIT_ACTIVE  = ''; // currently displayed event name
+let THIS_WEEK_EVENT    = null; // set by renderThisWeek once schedule loads
 
 // ── FIELD BUILDER STATE ───────────────────────────────────────────────
 let FIELD_SELECTION    = [];
@@ -1546,6 +1583,10 @@ async function loadSheetData() {
     // ── Players page table ────────────────────────────────────────
     applyFilters();
 
+    // ── Course Fit Rankings ───────────────────────────────────────
+    await loadCourseFitData();
+    renderCourseFitCard();
+
   } catch (e) {
     console.error('Sheet load failed:', e);
     document.getElementById('allPlayersBody').innerHTML =
@@ -1798,6 +1839,56 @@ function openPlayerModal(playerName) {
     ['Earnings',earn],
   ];
 
+  // ── Course Fit section (injected if data is loaded) ────────────────
+  const cfData = COURSE_FIT_MAP[name.toLowerCase()];
+  const cfSection = cfData ? (() => {
+    const cfScore  = parseFloat(cfData.composite_score || 0).toFixed(1);
+    const cfSgPct  = parseInt(cfData.sg_pct) || 0;
+    const cfCrsPct = parseInt(cfData.course_pct) || 0;
+    const cfApps   = parseInt(cfData.appearances) || 0;
+    const cfBest   = cfData.best_finish ? 'T' + cfData.best_finish : null;
+    const cfHist   = cfData.has_history === 'Yes';
+    const cfRank   = cfData.predicted_rank || '—';
+    const cfEvent  = cfData.event_name || 'Upcoming Event';
+    return `
+    <div style="border-top:1px solid var(--border-s);padding:14px 20px 18px;background:linear-gradient(180deg,var(--bg-secondary) 0%,#000 100%)">
+      <div style="font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.12em;color:var(--text-acc);font-family:'DM Mono',monospace;margin-bottom:12px">Course Fit &middot; ${escHtml(cfEvent)}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div style="text-align:center;background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.15);border-radius:5px;padding:10px 6px">
+          <div style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.07em;font-family:'DM Mono',monospace;margin-bottom:4px">Predicted Rank</div>
+          <div style="font-size:28px;font-weight:500;color:#C9A84C;font-family:'DM Mono',monospace;line-height:1">#${cfRank}</div>
+        </div>
+        <div style="text-align:center;background:rgba(42,122,90,.06);border:1px solid rgba(42,122,90,.15);border-radius:5px;padding:10px 6px">
+          <div style="font-size:9px;color:var(--text-sec);text-transform:uppercase;letter-spacing:.07em;font-family:'DM Mono',monospace;margin-bottom:4px">Composite Score</div>
+          <div style="font-size:28px;font-weight:500;color:#4ade80;font-family:'DM Mono',monospace;line-height:1">${cfScore}</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-sec);margin-bottom:3px;font-family:'DM Mono',monospace">
+            <span>Current Form &mdash; SG: ${cfSgPct}th pct</span><span>60%</span>
+          </div>
+          <div style="background:rgba(42,122,90,.12);height:6px;border-radius:3px;overflow:hidden">
+            <div style="width:${cfSgPct}%;height:100%;background:linear-gradient(90deg,#2A7A5A,#4ade80);border-radius:3px"></div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-sec);margin-bottom:3px;font-family:'DM Mono',monospace">
+            <span>Course History &mdash; ${cfHist ? cfApps + ' appearances' : 'no history'}</span><span>40%</span>
+          </div>
+          <div style="background:rgba(42,122,90,.12);height:6px;border-radius:3px;overflow:hidden">
+            <div style="width:${cfCrsPct}%;height:100%;background:linear-gradient(90deg,#2A7A5A,#C9A84C);border-radius:3px"></div>
+          </div>
+        </div>
+      </div>
+      <div style="font-size:10px;color:var(--text-sec);font-family:'DM Mono',monospace">
+        ${cfHist && cfBest
+          ? `Best finish at this event: <span style="color:#C9A84C;font-weight:600">${cfBest}</span>`
+          : `No course history &mdash; ranked by current form only`}
+      </div>
+    </div>`;
+  })() : '';
+
   document.getElementById('playerModalContent').innerHTML = `
     <div class="card-head" style="position:relative;padding-right:44px">
       <span class="card-title">Player Intelligence</span>
@@ -1885,6 +1976,7 @@ function openPlayerModal(playerName) {
         ${buildRadarSVG(p, OWGR_BENCHMARK, RADAR_RANGES)}
       </div>
     </div>
+    ${cfSection}
   `;
 
   document.getElementById('playerModal').classList.add('open');
@@ -2184,6 +2276,122 @@ async function loadEventTop10() {
   }
 }
 
+// ── COURSE FIT DATA ───────────────────────────────────────────────────
+async function loadCourseFitData() {
+  if (!COURSE_FIT_CSV || COURSE_FIT_DATA.length) return;
+  try {
+    const res = await fetch(COURSE_FIT_CSV);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    COURSE_FIT_DATA = parseScheduleCSV(await res.text());
+
+    // Group all rows by event_name
+    COURSE_FIT_ALL = {};
+    COURSE_FIT_DATA.forEach(r => {
+      if (!r.event_name) return;
+      if (!COURSE_FIT_ALL[r.event_name]) COURSE_FIT_ALL[r.event_name] = [];
+      COURSE_FIT_ALL[r.event_name].push(r);
+    });
+
+    // Default to most recently generated event, then try to sync to this week
+    const events = Object.keys(COURSE_FIT_ALL);
+    COURSE_FIT_ACTIVE = events.sort((a, b) => {
+      const ta = COURSE_FIT_ALL[a][0]?.generated_at || '';
+      const tb = COURSE_FIT_ALL[b][0]?.generated_at || '';
+      return tb.localeCompare(ta);
+    })[0] || '';
+
+    _syncCourseFitToThisWeek();
+    _buildCourseFitMap(COURSE_FIT_ACTIVE);
+  } catch(e) {
+    console.error('Course Fit CSV failed:', e);
+  }
+}
+
+function _buildCourseFitMap(eventName) {
+  COURSE_FIT_MAP = {};
+  const rows = COURSE_FIT_ALL[eventName] || [];
+  rows.forEach(r => {
+    if (r.player_name) COURSE_FIT_MAP[r.player_name.toLowerCase()] = r;
+  });
+}
+
+// Fuzzy-match a schedule event name against known Course Fit event keys
+function bestMatchEvent(target, keys) {
+  if (!target || !keys.length) return null;
+  const t = target.toLowerCase();
+  // Exact match first
+  for (const k of keys) if (k.toLowerCase() === t) return k;
+  // Starts-with or includes
+  for (const k of keys) if (k.toLowerCase().includes(t) || t.includes(k.toLowerCase())) return k;
+  // Word overlap score
+  const tWords = t.split(/\W+/).filter(Boolean);
+  let bestKey = null, bestScore = 0;
+  for (const k of keys) {
+    const kWords = k.toLowerCase().split(/\W+/).filter(Boolean);
+    const overlap = tWords.filter(w => kWords.includes(w)).length;
+    const score = overlap / Math.max(tWords.length, kWords.length);
+    if (score > bestScore) { bestScore = score; bestKey = k; }
+  }
+  return bestScore >= 0.4 ? bestKey : null;
+}
+
+// Wire Course Fit display to this week's tournament
+function _syncCourseFitToThisWeek() {
+  if (!THIS_WEEK_EVENT) return;
+  const keys = Object.keys(COURSE_FIT_ALL);
+  const match = bestMatchEvent(THIS_WEEK_EVENT.event_name, keys);
+  if (match) {
+    COURSE_FIT_ACTIVE = match;
+    _buildCourseFitMap(match);
+  }
+}
+
+function renderCourseFitCard() {
+  const card = document.getElementById('courseFitCard');
+  const body = document.getElementById('courseFitBody');
+  if (!card || !body || !COURSE_FIT_ACTIVE) return;
+
+  card.style.display = '';
+
+  // Show active event name label
+  const evLabelEl = document.getElementById('courseFitEvent');
+  if (evLabelEl) evLabelEl.textContent = COURSE_FIT_ACTIVE || '';
+
+  const activeRows = COURSE_FIT_ALL[COURSE_FIT_ACTIVE] || [];
+  const firstRow   = activeRows[0] || {};
+  const generatedAt = firstRow.generated_at || '';
+  const genEl = document.getElementById('courseFitGenerated');
+  if (genEl) genEl.textContent = generatedAt ? 'Updated ' + generatedAt : '';
+
+  const sorted = [...activeRows]
+    .filter(r => r.predicted_rank)
+    .sort((a, b) => parseInt(a.predicted_rank) - parseInt(b.predicted_rank))
+    .slice(0, 20);
+
+  body.innerHTML = sorted.map(r => {
+    const score  = parseFloat(r.composite_score) || 0;
+    const sgPct  = parseInt(r.sg_pct) || 0;
+    const crsPct = parseInt(r.course_pct) || 0;
+    const apps   = parseInt(r.appearances) || 0;
+    const best   = r.best_finish ? 'T' + r.best_finish : '—';
+    const hasHist = r.has_history === 'Yes';
+    return `<tr class="player-row" data-player="${escHtml(r.player_name)}">
+      <td class="rk">${r.predicted_rank}</td>
+      <td class="lft name-cell" style="white-space:nowrap">${escHtml(r.player_name)}</td>
+      <td class="acc">${score.toFixed(1)}</td>
+      <td class="mono">${sgPct}</td>
+      <td class="mono">${crsPct}</td>
+      <td class="mono" style="color:var(--text-sec)">${apps || '—'}</td>
+      <td class="mono" style="color:var(--text-sec)">${best}</td>
+      <td>
+        ${hasHist
+          ? `<span style="background:rgba(42,122,90,.2);color:#4ade80;font-size:8px;font-family:'DM Mono',monospace;padding:1px 5px;border-radius:2px;letter-spacing:.04em">YES</span>`
+          : `<span style="background:rgba(245,240,232,.05);color:var(--text-sec);font-size:8px;font-family:'DM Mono',monospace;padding:1px 5px;border-radius:2px;letter-spacing:.04em">NO</span>`}
+      </td>
+    </tr>`;
+  }).join('');
+}
+
 // ── THIS WEEK ON TOUR ────────────────────────────────────────────────
 async function renderThisWeek() {
   // Ensure schedule rows are loaded
@@ -2208,6 +2416,11 @@ async function renderThisWeek() {
     thisWeekEvt = upcoming[0];
   }
   if (!thisWeekEvt) return;
+
+  // Store for Course Fit auto-match and sync
+  THIS_WEEK_EVENT = thisWeekEvt;
+  _syncCourseFitToThisWeek();
+  renderCourseFitCard();
 
   // Show card
   const card = document.getElementById('thisWeekCard');
@@ -2489,6 +2702,10 @@ navigate(location.hash);
 
 // ── PLAYER TABLE CLICK DELEGATION ────────────────────────────────────
 document.getElementById('allPlayersBody').addEventListener('click', function(e) {
+  const row = e.target.closest('.player-row');
+  if (row && row.dataset.player) openPlayerModal(row.dataset.player);
+});
+document.getElementById('courseFitBody').addEventListener('click', function(e) {
   const row = e.target.closest('.player-row');
   if (row && row.dataset.player) openPlayerModal(row.dataset.player);
 });
