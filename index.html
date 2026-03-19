@@ -470,6 +470,18 @@
     <div style="width:48px;height:1px;background:linear-gradient(to right,transparent,rgba(201,168,76,.5),transparent);margin:10px auto 0"></div>
   </div>
 
+  <!-- THIS WEEK ON TOUR -->
+  <div id="thisWeekCard" class="card" style="margin-bottom:10px;display:none">
+    <div class="card-head">
+      <span class="card-title">This Week on Tour</span>
+      <span id="thisWeekStatus" style="font-size:10px;font-family:'DM Mono',monospace;letter-spacing:.06em"></span>
+    </div>
+    <div id="thisWeekBody" style="padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div id="thisWeekInfo" style="border-right:1px solid var(--border);padding-right:20px"></div>
+      <div id="thisWeekTop10"></div>
+    </div>
+  </div>
+
   <!-- ROW 1: Player Card + FedEx Standings -->
   <div class="row-grid-1" style="display:grid;grid-template-columns:330px 1fr;gap:10px;margin-bottom:10px">
 
@@ -1147,6 +1159,9 @@ const SHEET_CSV     = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSylaosRu
 // After running syncSchedule() in Apps Script, publish the 2026_schedule tab
 // and paste its CSV URL here (File > Share > Publish to web > 2026_schedule tab > CSV)
 const SCHEDULE_CSV  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSylaosRuMINmbrvu9QaO22slqmpL822Ay-jD6qguwVVFoFb4cqajl5MHb1r5qVffTXDbMf_FLh7Gc-/pub?gid=803514839&single=true&output=csv';
+// After running event_history_sync.py, publish the new tabs and paste their CSV URLs here:
+const EVENT_HISTORY_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSylaosRuMINmbrvu9QaO22slqmpL822Ay-jD6qguwVVFoFb4cqajl5MHb1r5qVffTXDbMf_FLh7Gc-/pub?gid=449903691&single=true&output=csv';
+const EVENT_TOP10_CSV   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSylaosRuMINmbrvu9QaO22slqmpL822Ay-jD6qguwVVFoFb4cqajl5MHb1r5qVffTXDbMf_FLh7Gc-/pub?gid=1900583655&single=true&output=csv';
 
 // ── TICKER DATA (static) ─────────────────────────────────────────────
 const GAMES = [
@@ -1987,7 +2002,185 @@ function renderLeaderboard() {
 
 // ── SCHEDULE (DataGolf) ──────────────────────────────────────────────
 const scheduleCache = {};
-let scheduleInitialized = false;
+let scheduleInitialized  = false;
+let thisWeekInitialized  = false;
+let eventHistoryData     = null;
+let eventTop10Data       = null;
+
+// ── EVENT HISTORY CSV LOADERS ────────────────────────────────────────
+async function loadEventHistory() {
+  if (eventHistoryData) return eventHistoryData;
+  if (!EVENT_HISTORY_CSV) return null;
+  try {
+    const res = await fetch(EVENT_HISTORY_CSV);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    eventHistoryData = parseScheduleCSV(await res.text());
+    return eventHistoryData;
+  } catch(e) {
+    console.error('Event History fetch failed:', e);
+    return null;
+  }
+}
+
+async function loadEventTop10() {
+  if (eventTop10Data) return eventTop10Data;
+  if (!EVENT_TOP10_CSV) return null;
+  try {
+    const res = await fetch(EVENT_TOP10_CSV);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    eventTop10Data = parseScheduleCSV(await res.text());
+    return eventTop10Data;
+  } catch(e) {
+    console.error('Event Top10 fetch failed:', e);
+    return null;
+  }
+}
+
+// ── THIS WEEK ON TOUR ────────────────────────────────────────────────
+async function renderThisWeek() {
+  // Ensure schedule rows are loaded
+  if (!scheduleAllRows) {
+    try {
+      const res = await fetch(SCHEDULE_CSV);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      scheduleAllRows = parseScheduleCSV(await res.text());
+    } catch(e) {
+      console.error('Schedule fetch failed in renderThisWeek:', e);
+      return;
+    }
+  }
+
+  // Find this week's event: live first, then nearest upcoming PGA event
+  const pgaEvents    = scheduleAllRows.filter(r => r.tour === 'pga');
+  let   thisWeekEvt  = pgaEvents.find(r => r.status === 'live');
+  if (!thisWeekEvt) {
+    const upcoming = pgaEvents
+      .filter(r => r.status === 'upcoming' && r.start_date)
+      .sort((a, b) => new Date(a.start_date) - new Date(b.start_date));
+    thisWeekEvt = upcoming[0];
+  }
+  if (!thisWeekEvt) return;
+
+  // Show card
+  const card = document.getElementById('thisWeekCard');
+  if (card) card.style.display = '';
+
+  // Status badge
+  const statusEl = document.getElementById('thisWeekStatus');
+  if (statusEl) {
+    if (thisWeekEvt.status === 'live') {
+      statusEl.textContent = '● LIVE';
+      statusEl.style.color = '#C9A84C';
+    } else {
+      statusEl.textContent = 'UPCOMING';
+      statusEl.style.color = 'rgba(0,200,50,.7)';
+    }
+  }
+
+  // Event info
+  const wFirst  = (thisWeekEvt.winner_first || '').trim();
+  const wLast   = (thisWeekEvt.winner_last  || '').trim();
+  const winner  = wFirst && wLast ? `${wFirst} ${wLast}` : (wLast || wFirst || '');
+  const infoEl  = document.getElementById('thisWeekInfo');
+  if (infoEl) {
+    infoEl.innerHTML = `
+      <div style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">PGA Tour</div>
+      <div style="font-family:Georgia,serif;font-size:clamp(15px,2vw,20px);font-weight:700;color:var(--text);line-height:1.25;margin-bottom:8px">${thisWeekEvt.event_name}</div>
+      <div style="font-size:12px;color:var(--text-sec);margin-bottom:4px">${thisWeekEvt.course || ''}</div>
+      <div style="font-size:11px;color:var(--text-sec);margin-bottom:12px">${thisWeekEvt.location || ''} · ${fmtScheduleDate(thisWeekEvt.start_date)}</div>
+      ${winner ? `<div style="font-size:11px;color:var(--text-sec)">Defending: <span style="color:#C9A84C;font-weight:500">${winner}</span></div>` : ''}
+    `;
+  }
+
+  // Last year's top 10
+  const top10El   = document.getElementById('thisWeekTop10');
+  if (!top10El) return;
+
+  const top10Data = await loadEventTop10();
+  if (!top10Data) {
+    top10El.innerHTML = `<div style="font-size:11px;color:var(--text-sec);font-family:'DM Mono',monospace">Run event_history_sync.py then publish the<br>Event Top10 tab to enable last year's top 10.</div>`;
+    return;
+  }
+
+  const eventTop10 = top10Data
+    .filter(r => r.event_name === thisWeekEvt.event_name)
+    .sort((a, b) => parseInt(a.finish) - parseInt(b.finish))
+    .slice(0, 10);
+
+  if (!eventTop10.length) {
+    top10El.innerHTML = `<div style="font-size:11px;color:var(--text-sec)">No top 10 history found for this event.</div>`;
+    return;
+  }
+
+  const histYear = eventTop10[0]?.year || '';
+  top10El.innerHTML = `
+    <div style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">${histYear} Top 10</div>
+    ${eventTop10.map(r => `
+      <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+        <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-sec);width:20px;text-align:right;flex-shrink:0">${r.finish}</span>
+        <span style="font-size:12px;color:var(--text);flex:1">${r.player_name || '—'}</span>
+        ${r.score ? `<span style="font-family:'DM Mono',monospace;font-size:10px;color:#C9A84C">${r.score}</span>` : ''}
+      </div>
+    `).join('')}
+  `;
+}
+
+// ── SCHEDULE ROW CLICK-TO-EXPAND (past winners) ──────────────────────
+async function toggleEventHistory(tr) {
+  const eventName = tr.dataset.event;
+  if (!eventName) return;
+
+  // If this row is already open, close it
+  const next = tr.nextElementSibling;
+  if (next && next.classList.contains('event-hist-row')) {
+    next.remove();
+    tr.classList.remove('hist-open');
+    return;
+  }
+
+  // Close any other open row first
+  document.querySelectorAll('.event-hist-row').forEach(r => r.remove());
+  document.querySelectorAll('.hist-open').forEach(r => r.classList.remove('hist-open'));
+  tr.classList.add('hist-open');
+
+  // Insert loading placeholder
+  const detailRow = document.createElement('tr');
+  detailRow.className = 'event-hist-row';
+  detailRow.innerHTML = `<td colspan="7" style="padding:14px 18px;background:var(--bg-secondary);border-bottom:1px solid var(--border)">
+    <div style="font-size:11px;color:var(--text-sec);font-family:'DM Mono',monospace">Loading history…</div>
+  </td>`;
+  tr.after(detailRow);
+
+  const td      = detailRow.querySelector('td');
+  const histData = await loadEventHistory();
+
+  if (!histData) {
+    td.innerHTML = `<div style="font-size:11px;color:var(--text-sec)">History not available yet — run event_history_sync.py and publish the Event History tab.</div>`;
+    return;
+  }
+
+  const eventHistory = histData
+    .filter(r => r.event_name === eventName)
+    .sort((a, b) => parseInt(b.year) - parseInt(a.year));
+
+  if (!eventHistory.length) {
+    td.innerHTML = `<div style="font-size:11px;color:var(--text-sec);font-family:'DM Mono',monospace">No history found for "${eventName}".</div>`;
+    return;
+  }
+
+  td.innerHTML = `
+    <div style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace;letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px">Past Winners</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:2px 20px">
+      ${eventHistory.map(r => `
+        <div style="display:flex;gap:10px;align-items:center;padding:5px 0;border-bottom:1px solid var(--border)">
+          <span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--text-sec);min-width:34px">${r.year}</span>
+          <span style="font-size:12px;color:var(--text);flex:1">${r.winner || '—'}</span>
+          ${r.winner_score ? `<span style="font-family:'DM Mono',monospace;font-size:10px;color:#C9A84C">${r.winner_score}</span>` : ''}
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
 
 const TOUR_LABELS = { pga: 'PGA Tour', euro: 'DP World Tour', kft: 'Korn Ferry Tour', liv: 'LIV Golf' };
 
@@ -2027,8 +2220,9 @@ function renderSchedule(data, tour) {
     const isCompleted = e.status === 'completed';
     const rowStyle    = isLive ? 'background:rgba(201,168,76,.07);' : isCompleted ? 'opacity:0.45;' : '';
     const winner      = fmtWinner(e.winner);
+    const safeEvent   = (e.event_name || '').replace(/"/g, '&quot;');
 
-    return `<tr style="${rowStyle}">
+    return `<tr style="${rowStyle}cursor:pointer" data-event="${safeEvent}" onclick="toggleEventHistory(this)" title="Click to see past winners">
       <td class="lft" style="font-family:'DM Mono',monospace;color:var(--text-sec)">${i+1}</td>
       <td class="lft" style="font-weight:500">${e.event_name||'—'}</td>
       <td class="lft" style="color:var(--text-sec)">${e.course||'—'}</td>
@@ -2130,6 +2324,11 @@ function navigate(hash) {
   if (viewId === 'scheduleView' && !scheduleInitialized) {
     scheduleInitialized = true;
     loadSchedule('pga');
+  }
+
+  if (viewId === 'homeView' && !thisWeekInitialized) {
+    thisWeekInitialized = true;
+    renderThisWeek();
   }
 }
 
