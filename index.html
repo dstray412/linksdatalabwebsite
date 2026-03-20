@@ -389,7 +389,6 @@
       .row-grid-1,
       .row-grid-2,
       .row-grid-3 { grid-template-columns: 1fr !important; }
-      .dash-row-3,
       .dash-row-2 { grid-template-columns: 1fr !important; }
       .pc-body { flex-direction: column !important; }
       .pc-body .pc-photo { flex-direction: row !important; gap: 12px; align-items: flex-start; }
@@ -1270,8 +1269,18 @@
     </div>
   </div>
 
-  <!-- ROW 1: Skill Radar + SG vs Field + Season Summary -->
-  <div class="dash-row-3" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+  <!-- ROW 1: Season Summary (full width) -->
+  <div class="card" style="margin-bottom:10px">
+    <div class="card-head">
+      <span class="card-title">Season Summary</span>
+    </div>
+    <div id="dashSeasonSummary" style="padding:12px 14px;display:flex;flex-direction:column;justify-content:center">
+      <div style="color:var(--text-sec);font-size:11px">Select a player</div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Skill Radar + SG vs Field Avg -->
+  <div class="dash-row-2" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
 
     <!-- Skill Radar -->
     <div class="card">
@@ -1298,16 +1307,6 @@
         <span class="card-title">SG vs Field Avg</span>
       </div>
       <div id="dashSGBarsContainer" style="padding:14px 16px;min-height:230px;display:flex;flex-direction:column;justify-content:center">
-        <div style="color:var(--text-sec);font-size:11px">Select a player</div>
-      </div>
-    </div>
-
-    <!-- Season Summary -->
-    <div class="card">
-      <div class="card-head">
-        <span class="card-title">Season Summary</span>
-      </div>
-      <div id="dashSeasonSummary" style="padding:12px 14px;min-height:230px;display:flex;flex-direction:column;justify-content:center">
         <div style="color:var(--text-sec);font-size:11px">Select a player</div>
       </div>
     </div>
@@ -1353,7 +1352,7 @@
           <button class="tab" onclick="switchTab(this);renderRankingsChart('Driving Distance')">Drive</button>
         </div>
       </div>
-      <div id="dashRankingsContainer" style="padding:6px 12px;overflow-y:auto;max-height:310px"></div>
+      <div id="dashRankingsContainer" style="padding:6px 12px;overflow-y:auto;max-height:520px"></div>
     </div>
   </div>
 
@@ -1826,7 +1825,7 @@ function renderRankingsChart(field) {
   const sorted = [...ALL_PLAYERS]
     .filter(p => !isNaN(parseFloat(p[field])))
     .sort((a,b) => (parseFloat(b[field])||0) - (parseFloat(a[field])||0))
-    .slice(0, 20);
+    .slice(0, 100);
   if (!sorted.length) { el.innerHTML = '<div style="color:var(--text-sec);font-size:11px;padding:8px">No data</div>'; return; }
   const maxVal = Math.abs(parseFloat(sorted[0][field])) || 1;
   el.innerHTML = sorted.map((p, i) => {
