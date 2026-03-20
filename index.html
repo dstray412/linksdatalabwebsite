@@ -748,20 +748,22 @@
       </div>
       <div class="profile-body" style="display:flex;min-height:220px">
         <div class="profile-photo" style="width:130px;flex-shrink:0;position:relative;overflow:hidden">
-          <img src="https://placehold.co/130x240/0a150e/C9A84C?text=Schauffele" alt="Xander Schauffele"
+          <img id="profilePhoto" src="https://placehold.co/130x240/0a150e/C9A84C?text=SS" alt="Scottie Scheffler"
                style="width:130px;height:240px;object-fit:cover;filter:grayscale(30%);display:block">
           <div style="position:absolute;inset:0;background:linear-gradient(to right,transparent 40%,var(--bg-card) 100%)"></div>
-          <div style="position:absolute;bottom:8px;left:8px;font-size:8px;color:var(--text-sec);font-family:'DM Mono',monospace">USA · Olympic Gold</div>
+          <div id="profileCountryNote" style="position:absolute;bottom:8px;left:8px;font-size:8px;color:var(--text-sec);font-family:'DM Mono',monospace">USA · World No. 1</div>
         </div>
         <div style="flex:1;padding:12px 14px;overflow-y:auto;max-height:240px">
-          <div style="font-size:20px;font-weight:700;letter-spacing:-.01em;color:var(--text);line-height:1;margin-bottom:2px;font-family:Georgia,serif">XANDER SCHAUFFELE</div>
-          <div style="font-size:9px;color:#C9A84C;text-transform:uppercase;letter-spacing:.09em;margin-bottom:10px;font-family:'DM Mono',monospace">PGA Tour · #3 World Ranking</div>
+          <div id="profileName" style="font-size:20px;font-weight:700;letter-spacing:-.01em;color:var(--text);line-height:1;margin-bottom:2px;font-family:Georgia,serif">SCOTTIE SCHEFFLER</div>
+          <div id="profileSubtitle" style="font-size:9px;color:#C9A84C;text-transform:uppercase;letter-spacing:.09em;margin-bottom:10px;font-family:'DM Mono',monospace">PGA Tour · #1 World Ranking</div>
+          <div id="profileDesc">
           <p style="font-size:11px;color:var(--text-sec);line-height:1.7;font-family:'DM Sans',sans-serif">
-            One of the most complete ball-strikers in the modern game. Schauffele's strokes-gained approach profile is among the elite — combining tight dispersion off the tee with a surgical iron game that consistently converts birdie looks at a rate few players can match.
+            The unquestioned best player in the world. Scheffler's all-around strokes-gained profile is historically dominant — combining elite tee-to-green ball-striking with a methodical approach game that manufactures birdie opportunities at an unmatched rate.
           </p>
           <p style="font-size:11px;color:var(--text-sec);line-height:1.7;font-family:'DM Sans',sans-serif;margin-top:8px">
-            Around the green, Schauffele demonstrates elite touch and trajectory control. His flat-stick performance has improved meaningfully year-over-year. The combination of long-game dominance and a sharpened short game creates a player who can win on any course setup.
+            His consistency is the defining trait: Scheffler rarely makes mistakes and converts when he gets looks. With SG: Total hovering above +4.8 and multiple wins in 2025–26, he remains the benchmark every other player on Tour is measured against.
           </p>
+          </div>
           <div style="margin-top:10px;display:flex;gap:6px">
             <button style="background:#2D5A3D;border:1px solid rgba(201,168,76,.3);color:#C9A84C;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:500;padding:3px 9px;border-radius:3px;cursor:pointer;transition:background .2s" onclick="location.hash='#players'" onmouseover="this.style.background='#3a7350'" onmouseout="this.style.background='#2D5A3D'">View All Players</button>
             <button style="background:none;border:1px solid var(--border);color:var(--text-sec);font-family:'DM Sans',sans-serif;font-size:9px;font-weight:400;padding:3px 9px;border-radius:3px;cursor:pointer;transition:border-color .2s" onmouseover="this.style.borderColor='var(--border-s)'" onmouseout="this.style.borderColor='var(--border)'">Next ▶</button>
@@ -1312,6 +1314,34 @@ function renderPlayerCard(p, listIndex) {
   const barW = v => Math.min(100, Math.abs(v) / 4 * 100).toFixed(1);
 
   document.getElementById('pcNameDisplay').textContent = name.toUpperCase();
+
+  // Sync Player Profile card
+  const profilePhoto = document.getElementById('profilePhoto');
+  const profileCountryNote = document.getElementById('profileCountryNote');
+  const profileName = document.getElementById('profileName');
+  const profileSubtitle = document.getElementById('profileSubtitle');
+  const profileDesc = document.getElementById('profileDesc');
+  if (profilePhoto) {
+    const profileSrc = p['Photo URL'] || `https://placehold.co/130x240/0a150e/C9A84C?text=${encodeURIComponent((first[0]||'')+(last[0]||''))}`;
+    profilePhoto.src = profileSrc;
+    profilePhoto.alt = name;
+    profilePhoto.onerror = function() { this.src = `https://placehold.co/130x240/0a150e/C9A84C?text=${encodeURIComponent((first[0]||'')+(last[0]||''))}`; };
+  }
+  if (profileCountryNote) profileCountryNote.textContent = `${cty} · World No. ${rank}`;
+  if (profileName) profileName.textContent = name.toUpperCase();
+  if (profileSubtitle) profileSubtitle.textContent = `PGA Tour · #${rank} World Ranking`;
+  if (profileDesc) {
+    const sgtVal = p['SG: Total'] || '—';
+    const wins = fmtNum(p['Season Wins']);
+    profileDesc.innerHTML = `
+      <p style="font-size:11px;color:var(--text-sec);line-height:1.7;font-family:'DM Sans',sans-serif">
+        Ranked #${rank} in the world, ${name} brings an elite strokes-gained profile to every event. Their tee-to-green game generates consistent birdie opportunities, anchored by one of the stronger approach games on Tour.
+      </p>
+      <p style="font-size:11px;color:var(--text-sec);line-height:1.7;font-family:'DM Sans',sans-serif;margin-top:8px">
+        With an SG: Total of ${sgtVal} and ${wins} win${wins === '1' ? '' : 's'} this season, ${name.split(' ')[0]} is a proven contender on any course setup. Their statistical footprint reflects a well-rounded game capable of performing in all conditions.
+      </p>`;
+  }
+
   const flagEl = document.getElementById('pcFlagDisplay');
   if (flagEl) {
     const flagUrl = getFlagUrl(cty);
