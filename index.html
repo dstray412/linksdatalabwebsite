@@ -1174,6 +1174,141 @@
 </main>
 </div><!-- /scheduleView -->
 
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  DASHBOARDS VIEW                                                   -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div id="dashboardsView" class="page-view">
+<main class="page">
+
+  <!-- Header -->
+  <div style="padding:20px 0 16px;position:relative">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(201,168,76,.05) 0%,transparent 70%);pointer-events:none"></div>
+    <a href="#home" style="display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--text-sec);font-family:'DM Mono',monospace;letter-spacing:.06em;transition:color .2s;margin-bottom:10px;cursor:pointer;text-decoration:none" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">← HOME</a>
+    <div style="display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px">
+      <div>
+        <h1 style="font-family:Georgia,serif;font-size:clamp(22px,3.5vw,40px);font-weight:700;letter-spacing:-.03em;color:var(--text);position:relative;z-index:1">
+          Analytics <span style="color:#C9A84C">Dashboards</span>
+        </h1>
+        <div style="font-size:11px;color:var(--text-sec);margin-top:5px">Radar skill maps · scatter plots · percentile rankings · tour leaders</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;position:relative;z-index:1">
+        <span style="font-size:9px;color:var(--text-sec);font-family:'DM Mono',monospace;letter-spacing:.06em;text-transform:uppercase">Player</span>
+        <select id="dashPlayerSelect" style="background:var(--bg-card);border:1px solid var(--border-s);color:var(--text);font-family:'DM Mono',monospace;font-size:10px;padding:5px 10px;border-radius:3px;cursor:pointer;outline:none;min-width:200px" onchange="onDashPlayerChange(this.value)">
+          <option value="">Loading…</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 1: Skill Radar + SG vs Field + Season Summary -->
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px">
+
+    <!-- Skill Radar -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Skill Radar</span>
+        <span id="dashRadarLabel" style="font-size:9px;font-family:'DM Mono',monospace;color:var(--text-sec);letter-spacing:.05em"></span>
+      </div>
+      <div id="dashRadarContainer" style="display:flex;justify-content:center;align-items:center;padding:8px 4px;min-height:230px">
+        <div style="color:var(--text-sec);font-size:11px">Select a player</div>
+      </div>
+      <div style="padding:4px 10px 8px;display:flex;justify-content:center;gap:16px">
+        <span style="display:flex;align-items:center;gap:5px;font-size:8px;color:var(--text-sec);font-family:'DM Mono',monospace">
+          <svg width="20" height="4"><line x1="0" y1="2" x2="20" y2="2" stroke="#C9A84C" stroke-width="2.5"/></svg>Player
+        </span>
+        <span style="display:flex;align-items:center;gap:5px;font-size:8px;color:var(--text-sec);font-family:'DM Mono',monospace">
+          <svg width="20" height="4"><line x1="0" y1="2" x2="20" y2="2" stroke="rgba(42,200,90,.65)" stroke-width="1.5" stroke-dasharray="4 2"/></svg>Top 100 Avg
+        </span>
+      </div>
+    </div>
+
+    <!-- SG vs Field Avg -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">SG vs Field Avg</span>
+      </div>
+      <div id="dashSGBarsContainer" style="padding:14px 16px;min-height:230px;display:flex;flex-direction:column;justify-content:center">
+        <div style="color:var(--text-sec);font-size:11px">Select a player</div>
+      </div>
+    </div>
+
+    <!-- Season Summary -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Season Summary</span>
+      </div>
+      <div id="dashSeasonSummary" style="padding:12px 14px;min-height:230px;display:flex;flex-direction:column;justify-content:center">
+        <div style="color:var(--text-sec);font-size:11px">Select a player</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Scatter Plot + Tour Rankings -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+
+    <!-- Scatter Plot -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Player Scatter</span>
+        <div style="display:flex;align-items:center;gap:6px">
+          <select id="dashScatterX" style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-sec);font-family:'DM Mono',monospace;font-size:8px;padding:2px 6px;border-radius:2px;cursor:pointer;outline:none" onchange="renderDashboardCharts()">
+            <option value="SG: Approach">SG: APR</option>
+            <option value="SG: Off the Tee">SG: OTT</option>
+            <option value="SG: Putting">SG: PUTT</option>
+            <option value="SG: Around Green">SG: ARG</option>
+            <option value="Driving Distance">DRIVE</option>
+          </select>
+          <span style="font-size:9px;color:var(--text-sec)">vs</span>
+          <select id="dashScatterY" style="background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-sec);font-family:'DM Mono',monospace;font-size:8px;padding:2px 6px;border-radius:2px;cursor:pointer;outline:none" onchange="renderDashboardCharts()">
+            <option value="SG: Putting">SG: PUTT</option>
+            <option value="SG: Approach">SG: APR</option>
+            <option value="SG: Off the Tee">SG: OTT</option>
+            <option value="SG: Around Green">SG: ARG</option>
+            <option value="SG: Total">SG: TOTAL</option>
+          </select>
+        </div>
+      </div>
+      <div id="dashScatterContainer" style="padding:8px;overflow:hidden"></div>
+    </div>
+
+    <!-- Tour Rankings -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Tour Rankings</span>
+        <div class="tabs" id="dashRankingsTabs">
+          <button class="tab active" onclick="switchTab(this);renderRankingsChart('SG: Total')">SG Tot</button>
+          <button class="tab" onclick="switchTab(this);renderRankingsChart('SG: Approach')">APR</button>
+          <button class="tab" onclick="switchTab(this);renderRankingsChart('SG: Putting')">PUTT</button>
+          <button class="tab" onclick="switchTab(this);renderRankingsChart('SG: Off the Tee')">OTT</button>
+          <button class="tab" onclick="switchTab(this);renderRankingsChart('Driving Distance')">Drive</button>
+        </div>
+      </div>
+      <div id="dashRankingsContainer" style="padding:6px 12px;overflow-y:auto;max-height:310px"></div>
+    </div>
+  </div>
+
+  <!-- ROW 3: Percentile Rankings -->
+  <div class="card" style="margin-bottom:10px">
+    <div class="card-head">
+      <span class="card-title">Percentile Rankings</span>
+      <span id="dashPctLabel" style="font-size:9px;font-family:'DM Mono',monospace;color:var(--text-sec);letter-spacing:.05em"></span>
+    </div>
+    <div id="dashPercentileContainer" style="padding:12px 14px">
+      <div style="color:var(--text-sec);font-size:11px">Select a player</div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align:center;padding:14px 0;color:var(--text-sec);font-size:9px;border-top:1px solid var(--border)">
+    <div style="margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px">
+      <img src="logo.png" alt="LinksData Lab" style="height:18px;width:auto;opacity:.7">
+    </div>
+    <div>© 2026 LinksData Lab · The Science Behind the Swing.</div>
+  </div>
+
+</main>
+</div><!-- /dashboardsView -->
+
 <!-- ── PLAYER MODAL ─────────────────────────────────────────────── -->
 <div id="playerModal" onclick="if(event.target===this)closePlayerModal()">
   <div class="modal-box">
@@ -1221,6 +1356,11 @@ let COURSE_FIT_MAP     = {}; // lowercase player_name → row (for active event)
 let COURSE_FIT_ALL     = {}; // event_name → [rows]  (all events)
 let COURSE_FIT_ACTIVE  = ''; // currently displayed event name
 let THIS_WEEK_EVENT    = null; // set by renderThisWeek once schedule loads
+
+// ── DASHBOARDS STATE ──────────────────────────────────────────────────
+let dashboardsInitialized = false;
+let dashSelectedPlayer    = null;
+let dashRankingsField     = 'SG: Total';
 
 // ── FIELD BUILDER STATE ───────────────────────────────────────────────
 let FIELD_SELECTION    = [];
@@ -1420,6 +1560,256 @@ function nextPlayerCard() {
   renderPlayerCard(pcPlayerList[pcPlayerIndex], pcPlayerIndex);
 }
 
+// ── DASHBOARDS ────────────────────────────────────────────────────────
+function initDashboards() {
+  if (!ALL_PLAYERS.length) return;
+  const sel = document.getElementById('dashPlayerSelect');
+  if (!sel) return;
+  const sorted = [...ALL_PLAYERS]
+    .filter(p => p['Player Name'])
+    .sort((a,b) => (parseInt(a['OWG Rank'])||999) - (parseInt(b['OWG Rank'])||999));
+  sel.innerHTML = sorted.map(p =>
+    `<option value="${escHtml(p['Player Name'])}">${p['Player Name']}</option>`
+  ).join('');
+  dashSelectedPlayer = sorted[0] || null;
+  if (dashSelectedPlayer) sel.value = dashSelectedPlayer['Player Name'];
+  renderDashboardCharts();
+  renderRankingsChart('SG: Total');
+}
+
+function onDashPlayerChange(name) {
+  dashSelectedPlayer = ALL_PLAYERS.find(p => p['Player Name'] === name) || null;
+  renderDashboardCharts();
+  renderRankingsChart(dashRankingsField);
+}
+
+function renderDashboardCharts() {
+  buildDashRadar();
+  buildDashSGBars();
+  buildDashSeasonSummary();
+  buildDashScatter();
+  buildDashPercentiles();
+}
+
+function buildDashRadar() {
+  const el = document.getElementById('dashRadarContainer');
+  const lbl = document.getElementById('dashRadarLabel');
+  if (!el) return;
+  if (!dashSelectedPlayer) { el.innerHTML = '<div style="color:var(--text-sec);font-size:11px;text-align:center">Select a player</div>'; return; }
+  if (lbl) lbl.textContent = (dashSelectedPlayer['Player Name']||'').toUpperCase();
+  el.innerHTML = buildRadarSVG(dashSelectedPlayer, OWGR_BENCHMARK, RADAR_RANGES);
+}
+
+function buildDashSGBars() {
+  const el = document.getElementById('dashSGBarsContainer');
+  if (!el) return;
+  if (!dashSelectedPlayer || !ALL_PLAYERS.length) { el.innerHTML = '<div style="color:var(--text-sec);font-size:11px">Select a player</div>'; return; }
+  const metrics = [
+    { label:'SG: TOTAL',     key:'SG: Total'        },
+    { label:'SG: APPROACH',  key:'SG: Approach'     },
+    { label:'SG: OFF TEE',   key:'SG: Off the Tee'  },
+    { label:'SG: ARD GREEN', key:'SG: Around Green' },
+    { label:'SG: PUTTING',   key:'SG: Putting'      },
+  ];
+  const avgs = {};
+  metrics.forEach(m => {
+    const vals = ALL_PLAYERS.map(p => parseFloat(p[m.key])).filter(v => !isNaN(v));
+    avgs[m.key] = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
+  });
+  const maxAbs = metrics.reduce((mx,m) => Math.max(mx, Math.abs(parseFloat(dashSelectedPlayer[m.key])||0), Math.abs(avgs[m.key])), 0.5);
+  el.innerHTML = metrics.map(m => {
+    const val = parseFloat(dashSelectedPlayer[m.key]) || 0;
+    const avg = avgs[m.key];
+    const diff = val - avg;
+    const pctPlayer = ((val / (maxAbs * 2)) + 0.5) * 100;
+    const midPct = 50;
+    const barLeft = Math.min(pctPlayer, midPct).toFixed(1);
+    const barWidth = Math.abs(pctPlayer - midPct).toFixed(1);
+    const barColor = val >= avg ? '#C9A84C' : '#e05252';
+    const diffStr = (diff >= 0 ? '+' : '') + diff.toFixed(2);
+    return `<div style="margin-bottom:13px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px">
+        <span style="font-size:8px;color:var(--text-sec);font-family:'DM Mono',monospace;letter-spacing:.05em">${m.label}</span>
+        <div style="display:flex;align-items:baseline;gap:6px">
+          <span style="font-size:13px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace">${fmtSG(val)}</span>
+          <span style="font-size:8px;color:${diff>=0?'#4ade80':'#f87171'};font-family:'DM Mono',monospace">${diffStr} vs avg</span>
+        </div>
+      </div>
+      <div style="position:relative;height:6px;background:rgba(42,122,90,.12);border-radius:3px;overflow:hidden">
+        <div style="position:absolute;left:${barLeft}%;width:${barWidth}%;height:100%;background:${barColor};border-radius:2px"></div>
+        <div style="position:absolute;left:50%;top:0;width:1px;height:100%;background:rgba(245,240,232,.25)"></div>
+      </div>
+      <div style="font-size:7px;color:var(--text-sec);font-family:'DM Mono',monospace;margin-top:2px">Tour Avg: ${fmtSG(avg)}</div>
+    </div>`;
+  }).join('');
+}
+
+function buildDashSeasonSummary() {
+  const el = document.getElementById('dashSeasonSummary');
+  if (!el) return;
+  if (!dashSelectedPlayer) { el.innerHTML = '<div style="color:var(--text-sec);font-size:11px">Select a player</div>'; return; }
+  const p = dashSelectedPlayer;
+  const rank = parseInt(p['OWG Rank']) || '—';
+  const wins = fmtNum(p['Season Wins']);
+  const t10  = fmtNum(p['Top 10s']);
+  const cuts = fmtNum(p['Cuts Made']);
+  const avg  = fmtNum(p['Scoring Avg'], 1);
+  const sgt  = fmtSG(p['SG: Total']);
+  const pctile = Math.round(parseFloat(p['SG Total %ile']) || 0);
+  const cty  = p['Country Code'] || '';
+  const flagUrl = getFlagUrl(cty);
+  const sgtPos = (parseFloat(p['SG: Total']) || 0) >= 0;
+  const statBox = (lbl, val, color='var(--text)') =>
+    `<div style="background:rgba(42,122,90,.08);border:1px solid var(--border);border-radius:4px;padding:8px 10px;text-align:center">
+      <div style="font-size:7.5px;color:var(--text-sec);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">${lbl}</div>
+      <div style="font-size:18px;font-weight:600;color:${color};font-family:'DM Mono',monospace;line-height:1">${val}</div>
+    </div>`;
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+      ${flagUrl ? `<img src="${flagUrl}" style="height:14px;border-radius:2px">` : ''}
+      <div>
+        <div style="font-size:14px;font-weight:700;letter-spacing:-.01em;color:var(--text);font-family:Georgia,serif">${(p['Player Name']||'').toUpperCase()}</div>
+        <div style="font-size:8px;color:#C9A84C;font-family:'DM Mono',monospace;margin-top:1px">WR #${rank} · ${cty}</div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:7px">
+      ${statBox('Wins', wins, '#C9A84C')}${statBox('Top 10s', t10)}${statBox('Cuts', cuts)}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:7px">
+      ${statBox('Scoring Avg', avg)}${statBox('SG: Total', sgt, sgtPos ? '#4ade80' : '#f87171')}
+    </div>
+    <div style="background:rgba(201,168,76,.06);border:1px solid rgba(201,168,76,.2);border-radius:4px;padding:8px 10px">
+      <div style="font-size:7.5px;color:var(--text-sec);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">SG Total Percentile</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div style="flex:1;background:rgba(42,122,90,.12);height:5px;border-radius:3px;overflow:hidden">
+          <div style="width:${pctile}%;height:100%;background:linear-gradient(90deg,#2A7A5A,#C9A84C);border-radius:3px"></div>
+        </div>
+        <span style="font-size:13px;font-weight:600;color:#C9A84C;font-family:'DM Mono',monospace;min-width:32px;text-align:right">${pctile}<span style="font-size:9px">th</span></span>
+      </div>
+    </div>`;
+}
+
+function buildDashScatter() {
+  const el = document.getElementById('dashScatterContainer');
+  if (!el || !ALL_PLAYERS.length) return;
+  const xField = (document.getElementById('dashScatterX') || {}).value || 'SG: Approach';
+  const yField = (document.getElementById('dashScatterY') || {}).value || 'SG: Putting';
+  const W = el.offsetWidth || 440, H = 270;
+  const pad = { t:16, r:16, b:36, l:46 };
+  const iW = W - pad.l - pad.r, iH = H - pad.t - pad.b;
+  const pts = ALL_PLAYERS
+    .map(p => ({ x: parseFloat(p[xField]), y: parseFloat(p[yField]), name: p['Player Name']||'' }))
+    .filter(p => !isNaN(p.x) && !isNaN(p.y));
+  if (!pts.length) { el.innerHTML = '<div style="color:var(--text-sec);font-size:11px;padding:12px">No data</div>'; return; }
+  const xVals = pts.map(p=>p.x), yVals = pts.map(p=>p.y);
+  const xPad = (Math.max(...xVals)-Math.min(...xVals))*0.08||0.5;
+  const yPad = (Math.max(...yVals)-Math.min(...yVals))*0.08||0.5;
+  const xLo=Math.min(...xVals)-xPad, xHi=Math.max(...xVals)+xPad;
+  const yLo=Math.min(...yVals)-yPad, yHi=Math.max(...yVals)+yPad;
+  const sx = x => ((x-xLo)/(xHi-xLo))*iW + pad.l;
+  const sy = y => iH - ((y-yLo)/(yHi-yLo))*iH + pad.t;
+  let grid = '';
+  for (let i=0; i<=4; i++) {
+    const xg = xLo + (xHi-xLo)*i/4, yg = yLo + (yHi-yLo)*i/4;
+    grid += `<line x1="${sx(xg).toFixed(1)}" y1="${pad.t}" x2="${sx(xg).toFixed(1)}" y2="${(pad.t+iH).toFixed(1)}" stroke="rgba(0,200,50,.07)" stroke-width="1"/>`;
+    grid += `<line x1="${pad.l}" y1="${sy(yg).toFixed(1)}" x2="${(pad.l+iW).toFixed(1)}" y2="${sy(yg).toFixed(1)}" stroke="rgba(0,200,50,.07)" stroke-width="1"/>`;
+    grid += `<text x="${sx(xg).toFixed(1)}" y="${(pad.t+iH+13).toFixed(1)}" text-anchor="middle" fill="rgba(245,240,232,.3)" font-size="7.5" font-family="DM Mono,monospace">${xg.toFixed(1)}</text>`;
+    grid += `<text x="${(pad.l-5).toFixed(1)}" y="${(sy(yg)+3).toFixed(1)}" text-anchor="end" fill="rgba(245,240,232,.3)" font-size="7.5" font-family="DM Mono,monospace">${yg.toFixed(1)}</text>`;
+  }
+  let zeroLines = '';
+  if (xLo<0 && xHi>0) zeroLines += `<line x1="${sx(0).toFixed(1)}" y1="${pad.t}" x2="${sx(0).toFixed(1)}" y2="${(pad.t+iH).toFixed(1)}" stroke="rgba(245,240,232,.15)" stroke-width="1" stroke-dasharray="4 3"/>`;
+  if (yLo<0 && yHi>0) zeroLines += `<line x1="${pad.l}" y1="${sy(0).toFixed(1)}" x2="${(pad.l+iW).toFixed(1)}" y2="${sy(0).toFixed(1)}" stroke="rgba(245,240,232,.15)" stroke-width="1" stroke-dasharray="4 3"/>`;
+  const selName = dashSelectedPlayer ? dashSelectedPlayer['Player Name'] : '';
+  const dots = pts.map(p => {
+    if (p.name === selName) return '';
+    return `<circle cx="${sx(p.x).toFixed(1)}" cy="${sy(p.y).toFixed(1)}" r="3" fill="rgba(42,122,90,.5)" stroke="rgba(42,122,90,.7)" stroke-width=".5"><title>${p.name}: ${p.x.toFixed(2)}, ${p.y.toFixed(2)}</title></circle>`;
+  }).join('');
+  const selPt = pts.find(p => p.name === selName);
+  let selDot = '';
+  if (selPt) {
+    const cx = sx(selPt.x).toFixed(1), cy = sy(selPt.y).toFixed(1);
+    const lastName = (selName.split(' ').pop()||selName).toUpperCase();
+    selDot = `<circle cx="${cx}" cy="${cy}" r="5.5" fill="#C9A84C" stroke="#0a150e" stroke-width="2"/><text x="${cx}" y="${(parseFloat(cy)-9).toFixed(1)}" text-anchor="middle" fill="#C9A84C" font-size="9" font-family="DM Mono,monospace" font-weight="600">${lastName}</text>`;
+  }
+  const xLbl = xField.replace('SG: ','SG: ').replace('Driving Distance','DRIVE');
+  const yLbl = yField.replace('SG: ','SG: ').replace('Driving Distance','DRIVE');
+  el.innerHTML = `<svg width="${W}" height="${H}" style="display:block;overflow:visible">
+    <rect x="${pad.l}" y="${pad.t}" width="${iW}" height="${iH}" fill="rgba(42,122,90,.03)" rx="3"/>
+    ${grid}${zeroLines}${dots}${selDot}
+    <text x="${(pad.l+iW/2).toFixed(1)}" y="${H-2}" text-anchor="middle" fill="rgba(245,240,232,.4)" font-size="9" font-family="DM Mono,monospace" letter-spacing=".06em">${xLbl}</text>
+    <text x="10" y="${(pad.t+iH/2).toFixed(1)}" text-anchor="middle" fill="rgba(245,240,232,.4)" font-size="9" font-family="DM Mono,monospace" letter-spacing=".06em" transform="rotate(-90,10,${(pad.t+iH/2).toFixed(1)})">${yLbl}</text>
+  </svg>`;
+}
+
+function renderRankingsChart(field) {
+  dashRankingsField = field;
+  const el = document.getElementById('dashRankingsContainer');
+  if (!el || !ALL_PLAYERS.length) return;
+  const selName = dashSelectedPlayer ? dashSelectedPlayer['Player Name'] : '';
+  const sorted = [...ALL_PLAYERS]
+    .filter(p => !isNaN(parseFloat(p[field])))
+    .sort((a,b) => (parseFloat(b[field])||0) - (parseFloat(a[field])||0))
+    .slice(0, 20);
+  if (!sorted.length) { el.innerHTML = '<div style="color:var(--text-sec);font-size:11px;padding:8px">No data</div>'; return; }
+  const maxVal = Math.abs(parseFloat(sorted[0][field])) || 1;
+  el.innerHTML = sorted.map((p, i) => {
+    const val = parseFloat(p[field]) || 0;
+    const pct = Math.max(2, (Math.abs(val)/maxVal)*100).toFixed(1);
+    const sv  = field.startsWith('SG') ? fmtSG(p[field]) : fmtNum(p[field], field==='Scoring Avg'?1:0);
+    const isSel = p['Player Name'] === selName;
+    const color = isSel ? '#C9A84C' : (i<3 ? '#C9A84C' : i<6 ? '#b89640' : '#2A7A5A');
+    const parts = (p['Player Name']||'').split(' ');
+    const dname = parts.length>1 ? parts[parts.length-1].toUpperCase()+', '+parts[0][0]+'.' : (p['Player Name']||'').toUpperCase();
+    return `<div class="bar-row" style="${isSel?'background:rgba(201,168,76,.06);border-radius:3px;padding:0 3px;margin:0 -3px;':''}">
+      <div class="bar-label" style="display:flex;align-items:center;gap:4px">
+        <span style="background:var(--row-num);color:${isSel?'#C9A84C':'var(--text-sec)'};font-size:9px;font-family:'DM Mono',monospace;min-width:16px;text-align:center;border-radius:2px;flex-shrink:0">${i+1}</span>
+        <span style="font-weight:${isSel?600:400};color:${isSel?'#C9A84C':'var(--text)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:11px">${dname}</span>
+      </div>
+      <div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${color};opacity:${isSel?1:.8}"></div></div>
+      <div class="bar-val" style="color:${color};font-weight:${isSel?600:400}">${sv}</div>
+    </div>`;
+  }).join('');
+}
+
+function buildDashPercentiles() {
+  const el = document.getElementById('dashPercentileContainer');
+  const lbl = document.getElementById('dashPctLabel');
+  if (!el) return;
+  if (!dashSelectedPlayer || !ALL_PLAYERS.length) { el.innerHTML = '<div style="color:var(--text-sec);font-size:11px">Select a player</div>'; return; }
+  if (lbl) lbl.textContent = (dashSelectedPlayer['Player Name']||'').toUpperCase();
+  const metrics = [
+    { label:'SG: TOTAL',     key:'SG: Total',         fmt: v=>fmtSG(v) },
+    { label:'SG: APPROACH',  key:'SG: Approach',      fmt: v=>fmtSG(v) },
+    { label:'SG: OFF TEE',   key:'SG: Off the Tee',   fmt: v=>fmtSG(v) },
+    { label:'SG: ARD GREEN', key:'SG: Around Green',  fmt: v=>fmtSG(v) },
+    { label:'SG: PUTTING',   key:'SG: Putting',       fmt: v=>fmtSG(v) },
+    { label:'GIR %',         key:'GIR %',             fmt: v=>v.toFixed(1)+'%' },
+    { label:'DRIVING DIST',  key:'Driving Distance',  fmt: v=>Math.round(v)+' yds' },
+    { label:'SCORING AVG',   key:'Scoring Avg',       fmt: v=>v.toFixed(2) },
+  ];
+  el.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:8px">` +
+    metrics.map(m => {
+      const pv = parseFloat(dashSelectedPlayer[m.key]);
+      if (isNaN(pv)) return `<div style="background:rgba(42,122,90,.04);border:1px solid var(--border);border-radius:4px;padding:8px 10px;opacity:.4">
+        <div style="font-size:7.5px;color:var(--text-sec);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em">${m.label}</div>
+        <div style="font-size:11px;color:var(--text-sec);font-family:'DM Mono',monospace;margin-top:4px">—</div>
+      </div>`;
+      const vals = ALL_PLAYERS.map(pl => parseFloat(pl[m.key])).filter(v => !isNaN(v)).sort((a,b)=>a-b);
+      const pctile = Math.round((vals.filter(v=>v<pv).length / vals.length)*100);
+      const color = pctile>=80?'#4ade80':pctile>=50?'#C9A84C':'#f87171';
+      return `<div style="background:rgba(42,122,90,.05);border:1px solid var(--border);border-radius:4px;padding:8px 10px">
+        <div style="font-size:7.5px;color:var(--text-sec);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">${m.label}</div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px">
+          <span style="font-size:13px;font-weight:600;color:var(--text);font-family:'DM Mono',monospace">${m.fmt(pv)}</span>
+          <span style="font-size:10px;font-weight:600;color:${color};font-family:'DM Mono',monospace">${pctile}<span style="font-size:7px">th</span></span>
+        </div>
+        <div style="background:rgba(42,122,90,.12);height:4px;border-radius:2px;overflow:hidden">
+          <div style="width:${pctile}%;height:100%;background:${color};border-radius:2px"></div>
+        </div>
+      </div>`;
+    }).join('') + `</div>`;
+}
+
 // ── LOAD SHEET DATA ──────────────────────────────────────────────────
 // ── SG LEADERS VIEW ──────────────────────────────────────────────────
 function buildSGChart(containerId, players, field) {
@@ -1612,6 +2002,12 @@ async function loadSheetData() {
 
     // ── Players page table ────────────────────────────────────────
     applyFilters();
+
+    // ── Dashboards (init now if already on that view) ─────────────
+    if (!dashboardsInitialized && document.getElementById('dashboardsView') && document.getElementById('dashboardsView').classList.contains('active')) {
+      dashboardsInitialized = true;
+      initDashboards();
+    }
 
     // ── Course Fit Rankings ───────────────────────────────────────
     await loadCourseFitData();
@@ -2692,6 +3088,7 @@ const ROUTES = {
   'stats':          'statsView',
   'strokes-gained': 'strokesGainedView',
   'schedule':       'scheduleView',
+  'dashboards':     'dashboardsView',
 };
 
 function navigate(hash) {
@@ -2720,6 +3117,11 @@ function navigate(hash) {
   if (viewId === 'homeView' && !thisWeekInitialized) {
     thisWeekInitialized = true;
     renderThisWeek();
+  }
+
+  if (viewId === 'dashboardsView' && !dashboardsInitialized && ALL_PLAYERS.length) {
+    dashboardsInitialized = true;
+    initDashboards();
   }
 }
 
