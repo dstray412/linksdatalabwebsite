@@ -156,6 +156,20 @@
       border-bottom: 1px solid var(--border-s);
       gap: 8px;
     }
+    #statsView .card { cursor: pointer; }
+    #statsModal {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.88); z-index: 200;
+      display: flex; align-items: center; justify-content: center; padding: 20px;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    #statsModal.open { opacity: 1; pointer-events: all; }
+    #statsModal .modal-box {
+      background: var(--bg-card); border: 1px solid var(--border-s); border-radius: 8px;
+      width: 100%; max-width: 560px; max-height: 88vh; overflow-y: auto;
+      position: relative; transform: translateY(14px); transition: transform 0.2s;
+    }
+    #statsModal.open .modal-box { transform: translateY(0); }
+
     .card-title {
       font-size: 11px;
       font-weight: 500;
@@ -956,7 +970,7 @@
     <h1 style="font-family:Georgia,serif;font-size:clamp(22px,3.5vw,40px);font-weight:700;letter-spacing:-.03em;color:var(--text);position:relative;z-index:1">
       Stats &amp; <span style="color:#C9A84C">Leaders</span>
     </h1>
-    <div style="font-size:11px;color:var(--text-sec);margin-top:5px">Top 10 leaders across all major statistical categories</div>
+    <div style="font-size:11px;color:var(--text-sec);margin-top:5px">Top 50 leaders across all major statistical categories</div>
   </div>
 
   <!-- Section: Performance -->
@@ -1575,6 +1589,12 @@
 </div><!-- /aboutView -->
 
 <!-- ── PLAYER MODAL ─────────────────────────────────────────────── -->
+<div id="statsModal" onclick="if(event.target===this)closeStatsModal()">
+  <div class="modal-box">
+    <div id="statsModalContent"></div>
+  </div>
+</div>
+
 <div id="playerModal" onclick="if(event.target===this)closePlayerModal()">
   <div class="modal-box">
     <div id="playerModalContent"></div>
@@ -2080,10 +2100,12 @@ function buildDashPercentiles() {
 function buildSGChart(containerId, players, field) {
   const el = document.getElementById(containerId);
   if (!el) return;
+  el.style.maxHeight = '210px';
+  el.style.overflowY = 'auto';
   const sorted = [...players]
     .filter(p => parseFloat(p[field]) !== 0 && !isNaN(parseFloat(p[field])))
     .sort((a, b) => (parseFloat(b[field]) || 0) - (parseFloat(a[field]) || 0))
-    .slice(0, 10);
+    .slice(0, 50);
   if (!sorted.length) { el.innerHTML = '<div style="color:var(--text-sec);font-size:11px;padding:8px">No data</div>'; return; }
   const maxVal = parseFloat(sorted[0][field]) || 1;
   el.innerHTML = sorted.map((p, i) => {
@@ -2106,6 +2128,8 @@ function buildSGChart(containerId, players, field) {
 function buildStatChart(containerId, players, field, opts) {
   const el = document.getElementById(containerId);
   if (!el) return;
+  el.style.maxHeight = '210px';
+  el.style.overflowY = 'auto';
   const lowerIsBetter = opts && opts.lowerIsBetter;
   const fmt = opts && opts.fmt;
   const unit = (opts && opts.unit) || '';
@@ -2120,7 +2144,7 @@ function buildStatChart(containerId, players, field, opts) {
       const vb = parseFloat(String(b[field] || '').replace(/[$,]/g, '')) || 0;
       return lowerIsBetter ? va - vb : vb - va;
     })
-    .slice(0, 10);
+    .slice(0, 50);
 
   if (!sorted.length) { el.innerHTML = '<div style="color:var(--text-sec);font-size:11px;padding:8px">No data</div>'; return; }
 
@@ -2167,6 +2191,34 @@ function populateStatsView(players) {
   buildSGChart('statsSGPUTTChart',    players, 'SG: Putting');
   // Earnings
   buildStatChart('statsEarningsChart', players, 'Career Earnings ($)', { fmt: v => fmtEarn(String(v)) });
+
+  // Open modal on card click (once)
+  if (!window._statsModalInit) {
+    window._statsModalInit = true;
+    document.getElementById('statsView').addEventListener('click', function(e) {
+      const card = e.target.closest('#statsView .card');
+      if (!card) return;
+      const chart = card.querySelector('[id^="stats"]');
+      if (!chart) return;
+      const title    = (card.querySelector('.card-title') || {}).textContent || '';
+      const subtitle = card.querySelector('.card-head span:last-child:not(.card-title)');
+      const subtitleHtml = subtitle ? `<span style="font-size:12px;color:var(--text-sec);font-family:'DM Mono',monospace">${subtitle.textContent}</span>` : '';
+      document.getElementById('statsModalContent').innerHTML = `
+        <div class="card-head" style="position:sticky;top:0;z-index:1">
+          <div style="display:flex;flex-direction:column;gap:2px">
+            <span class="card-title">${title}</span>
+            ${subtitleHtml}
+          </div>
+          <button class="modal-close" onclick="closeStatsModal()" style="position:static;margin-left:auto">&times;</button>
+        </div>
+        <div style="padding:8px 10px">${chart.innerHTML}</div>`;
+      document.getElementById('statsModal').classList.add('open');
+    });
+  }
+}
+
+function closeStatsModal() {
+  document.getElementById('statsModal').classList.remove('open');
 }
 
 function populateSGView(players) {
@@ -3442,7 +3494,7 @@ document.getElementById('playerSearch').addEventListener('input', applyFilters);
 
 // ── ESC KEY CLOSES MODAL ─────────────────────────────────────────────
 document.addEventListener('keydown', function(e) {
-  if (e.key === 'Escape') closePlayerModal();
+  if (e.key === 'Escape') { closePlayerModal(); closeStatsModal(); }
 });
 </script>
 
