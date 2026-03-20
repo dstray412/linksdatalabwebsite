@@ -467,6 +467,7 @@
   <a class="nav-link" href="#strokes-gained">Strokes Gained</a>
   <a class="nav-link" href="#dashboards">Dashboards</a>
   <a class="nav-link" href="#fantasy">Fantasy</a>
+  <a class="nav-link" href="#about">About</a>
   <div style="flex:1"></div>
   <button class="nav-cta" onclick="location.hash='#strokes-gained'">SG: Total Leaders →</button>
   <button class="nav-hamburger" id="navHamburger" aria-label="Open menu" aria-expanded="false">☰</button>
@@ -481,6 +482,7 @@
   <a href="#strokes-gained">Strokes Gained</a>
   <a href="#dashboards">Dashboards</a>
   <a href="#fantasy">Fantasy</a>
+  <a href="#about">About</a>
   <button class="nav-drawer-cta" onclick="location.hash='#strokes-gained'">SG: Total Leaders →</button>
 </div>
 
@@ -1384,6 +1386,193 @@
 
 </main>
 </div><!-- /dashboardsView -->
+
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<!--  ABOUT VIEW                                                       -->
+<!-- ══════════════════════════════════════════════════════════════════ -->
+<div id="aboutView" class="page-view">
+<main class="page" style="max-width:860px">
+
+  <!-- Header -->
+  <div style="padding:28px 0 24px;position:relative">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 50%,rgba(201,168,76,.05) 0%,transparent 70%);pointer-events:none"></div>
+    <a href="#home" style="display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--text-sec);font-family:'DM Mono',monospace;letter-spacing:.06em;transition:color .2s;margin-bottom:16px;cursor:pointer;text-decoration:none" onmouseover="this.style.color='#C9A84C'" onmouseout="this.style.color='var(--text-sec)'">← HOME</a>
+    <h1 style="font-family:Georgia,serif;font-size:clamp(26px,4vw,44px);font-weight:700;letter-spacing:-.03em;line-height:1.05;color:var(--text);position:relative;z-index:1">
+      Player <span style="color:#C9A84C">Intelligence</span>
+    </h1>
+    <div style="width:48px;height:1px;background:linear-gradient(to right,transparent,rgba(201,168,76,.5),transparent);margin:12px 0 0"></div>
+  </div>
+
+  <!-- Intro paragraphs -->
+  <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:32px">
+    <p style="font-size:14px;line-height:1.75;color:var(--text);opacity:.88">
+      The Player Intelligence cards are the core analytics view on LinksData Lab. Each card consolidates the metrics we believe best capture a golfer's current performance level across all phases of play — off the tee, through the fairway, around the green, and on the putting surface.
+    </p>
+    <p style="font-size:14px;line-height:1.75;color:var(--text);opacity:.88">
+      The key thing to understand is that these numbers are estimates of underlying <em>skill</em>, not just results. A player who wins twice may rank lower than a consistent ball-striker who finishes T5–T15 every week, because the metrics are designed to reveal repeatable ability rather than hot streaks or lucky breaks.
+    </p>
+    <p style="font-size:14px;line-height:1.75;color:var(--text);opacity:.88">
+      Strokes Gained figures are sourced from <span style="color:#C9A84C">DataGolf</span> and reflect performance relative to the field average in each category, measured in strokes per round. A value of +1.0 means the player gains one full stroke per round on their peers in that category — which, at tour level, is a very significant edge.
+    </p>
+    <p style="font-size:14px;line-height:1.75;color:var(--text);opacity:.88">
+      You'll also notice a large circular percentile gauge on each card. This is the player's <strong style="color:var(--text)">SG Total percentile</strong> — how they rank among all active tour players. A reading of 94 means the player is in the top 6% of the field. Unlike raw strokes-gained values, the percentile is easier to compare across eras and fields.
+    </p>
+  </div>
+
+  <!-- Context Data -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-head">
+      <span class="card-title">Context Data</span>
+    </div>
+    <div style="padding:16px 20px;display:flex;flex-direction:column;gap:0">
+      <p style="font-size:13px;line-height:1.65;color:var(--text-sec);margin-bottom:16px">
+        These fields provide biographical and seasonal context. They do not feed into any scoring model — they're simply useful background when evaluating a player.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:var(--text);min-width:150px;flex-shrink:0">World Ranking</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Official World Golf Ranking (OWGR) at the time of the last data refresh. The globally recognised benchmark for current player quality across all tours.</span>
+        </div>
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:var(--text);min-width:150px;flex-shrink:0">FedEx Cup Rank</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Current season FedEx Cup standings. Reflects points accumulated across all PGA Tour events played to date.</span>
+        </div>
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:var(--text);min-width:150px;flex-shrink:0">Season Wins</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Number of PGA Tour victories in the current season.</span>
+        </div>
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:var(--text);min-width:150px;flex-shrink:0">Top 10s</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Top-10 finishes this season. A strong indicator of consistency — many elite players rack up top-10s without necessarily winning every week.</span>
+        </div>
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:var(--text);min-width:150px;flex-shrink:0">Cuts Made</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Number of 36-hole cuts successfully made this season. Alongside scoring average, this gives a sense of how often a player is contending on weekends.</span>
+        </div>
+        <div style="display:flex;gap:10px">
+          <span style="font-size:13px;font-weight:500;color:var(--text);min-width:150px;flex-shrink:0">Scoring Average</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Adjusted scoring average per round for the current season. Adjusted means it accounts for course and field difficulty, making scores more comparable across events.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Strokes Gained Data -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-head">
+      <span class="card-title" style="color:#4ade80">Strokes Gained Data</span>
+    </div>
+    <div style="padding:16px 20px;display:flex;flex-direction:column;gap:0">
+      <p style="font-size:13px;line-height:1.65;color:var(--text-sec);margin-bottom:16px">
+        Strokes Gained (SG) is the gold standard for measuring golf performance. Every shot is compared against the statistical average outcome for shots from that situation. Gaining or losing strokes relative to that baseline is how a player is scored. All values are strokes gained <em>per round</em>.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:#C9A84C;min-width:150px;flex-shrink:0;font-family:'DM Mono',monospace">SG: Total</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">The sum of all Strokes Gained categories — the single headline number for overall performance. Positive values mean the player is outperforming the average tour player. The large circular gauge on each card shows this as a percentile ranking.</span>
+        </div>
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:#C9A84C;min-width:150px;flex-shrink:0;font-family:'DM Mono',monospace">SG: Approach</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Strokes gained on approach shots — typically full iron shots into greens from 50 yards and beyond. This is widely considered the category most predictive of long-term scoring performance. Elite ball-strikers routinely lead the tour in this category.</span>
+        </div>
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:#C9A84C;min-width:150px;flex-shrink:0;font-family:'DM Mono',monospace">SG: Putting</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Strokes gained on the putting surface. Putting is highly variable from week to week, so a strong season-long SG: Putting value is meaningful — it suggests the player is genuinely outperforming on the greens, not just running hot.</span>
+        </div>
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:#C9A84C;min-width:150px;flex-shrink:0;font-family:'DM Mono',monospace">SG: Off the Tee</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Strokes gained on tee shots on par-4 and par-5 holes. Captures both driving distance and driving accuracy — a player who is long but crooked can still post a mediocre SG: OTT if they're frequently finding trouble.</span>
+        </div>
+        <div style="display:flex;gap:10px">
+          <span style="font-size:13px;font-weight:500;color:#C9A84C;min-width:150px;flex-shrink:0;font-family:'DM Mono',monospace">SG: Around Green</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Strokes gained on shots within 30 yards of the green, excluding putts — chips, pitches, and bunker shots. Measures short game skill in the awkward zone between full swings and putting.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Extra Stats -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-head">
+      <span class="card-title" style="color:rgba(201,168,76,.75)">Extra Stats</span>
+    </div>
+    <div style="padding:16px 20px;display:flex;flex-direction:column;gap:0">
+      <p style="font-size:13px;line-height:1.65;color:var(--text-sec);margin-bottom:16px">
+        Traditional statistics that complement the Strokes Gained picture and provide familiar reference points.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:var(--text);min-width:150px;flex-shrink:0">GIR %</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Greens in Regulation percentage — the share of holes where the player reached the putting surface in the regulation number of shots (par minus two). A raw proxy for ball-striking quality, though SG: Approach is more precise.</span>
+        </div>
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:var(--text);min-width:150px;flex-shrink:0">Driving Distance</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Average carry distance off the tee in yards, measured on designated driving holes. In the modern era, distance is a significant competitive advantage — longer hitters face shorter approach shots and therefore easier scoring opportunities.</span>
+        </div>
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:var(--text);min-width:150px;flex-shrink:0">Putts Per Round</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Average number of putts taken per round. Use this alongside SG: Putting — a low putts-per-round can sometimes reflect a player who is missing more greens (and therefore putting from closer), rather than genuine putting excellence.</span>
+        </div>
+        <div style="display:flex;gap:10px">
+          <span style="font-size:13px;font-weight:500;color:var(--text);min-width:150px;flex-shrink:0">Career Earnings</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Total official PGA Tour career earnings in USD. While not a skill metric, it provides useful longevity context — a player with $50M+ in career earnings has sustained tour-level performance over many years.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Course Fit -->
+  <div class="card" style="margin-bottom:32px">
+    <div class="card-head">
+      <span class="card-title" style="color:#4ade80">Course Fit</span>
+    </div>
+    <div style="padding:16px 20px;display:flex;flex-direction:column;gap:0">
+      <p style="font-size:13px;line-height:1.65;color:var(--text-sec);margin-bottom:16px">
+        The Course Fit section is unique to LinksData Lab. It appears on player cards in the week leading up to a tournament and provides a model-driven estimate of how well-suited a player is to the current venue.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:11px">
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:var(--text);min-width:150px;flex-shrink:0">Composite Score</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">A blended 0–100 score combining current SG form (weighted 60%) and historical course performance (weighted 40%). Higher is better. This is the primary sorting metric in the Course Fit table.</span>
+        </div>
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:var(--text);min-width:150px;flex-shrink:0">Predicted Rank</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Our model's predicted leaderboard position at the upcoming event, based on the composite score. This is not a guarantee — golf is inherently unpredictable — but it represents the expected outcome given current form and course history.</span>
+        </div>
+        <div style="display:flex;gap:10px;padding-bottom:11px;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;font-weight:500;color:var(--text);min-width:150px;flex-shrink:0">Current Form</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">The player's SG: Total percentile over recent weeks. Shown as a filled progress bar — a player at the 90th percentile means 90% of the active field is below them in current strokes-gained form.</span>
+        </div>
+        <div style="display:flex;gap:10px">
+          <span style="font-size:13px;font-weight:500;color:var(--text);min-width:150px;flex-shrink:0">Course History</span>
+          <span style="font-size:13px;color:var(--text-sec);line-height:1.6">Number of previous appearances at this specific venue and the player's best recorded finish. First-timers are ranked on current form only. A strong course history at a difficult track — like Augusta or Pebble Beach — is a meaningful signal.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div style="text-align:center;padding:14px 0 32px">
+    <a href="#players" style="display:inline-block;background:#2D5A3D;border:1px solid rgba(201,168,76,.4);color:#C9A84C;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;padding:10px 24px;border-radius:4px;letter-spacing:.04em;text-decoration:none;transition:background .2s,transform .1s" onmouseover="this.style.background='#3a7350'" onmouseout="this.style.background='#2D5A3D'" onmousedown="this.style.transform='scale(0.97)'" onmouseup="this.style.transform='scale(1)'">
+      View Player Cards →
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <div style="text-align:center;padding:14px 0;color:var(--text-sec);font-size:12px;border-top:1px solid var(--border)">
+    <div style="margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px">
+      <img src="logo.png" alt="LinksData Lab" style="height:18px;width:auto;opacity:.7">
+    </div>
+    <div>© 2026 LinksData Lab · The Science Behind the Swing.</div>
+    <div style="margin-top:5px;display:flex;flex-wrap:wrap;justify-content:center;gap:4px 12px">
+      <span>Strokes-gained &amp; player stats via <span style="color:rgba(201,168,76,.7)">DataGolf</span></span>
+      <span>·</span>
+      <span>World rankings via <span style="color:rgba(201,168,76,.7)">OWGR</span></span>
+    </div>
+  </div>
+
+</main>
+</div><!-- /aboutView -->
 
 <!-- ── PLAYER MODAL ─────────────────────────────────────────────── -->
 <div id="playerModal" onclick="if(event.target===this)closePlayerModal()">
@@ -3165,6 +3354,7 @@ const ROUTES = {
   'strokes-gained': 'strokesGainedView',
   'schedule':       'scheduleView',
   'dashboards':     'dashboardsView',
+  'about':          'aboutView',
 };
 
 function navigate(hash) {
