@@ -608,26 +608,26 @@
           <button class="tab active" onclick="switchTab(this)">FedEx Cup</button>
         </div>
       </div>
-      <div style="overflow-x:auto">
+      <div style="overflow-x:auto;overflow-y:auto;max-height:460px">
         <table class="dt">
-          <thead>
-            <tr>
-              <th class="lft" style="width:22px">RK</th>
-              <th class="lft" style="min-width:160px">PLAYER</th>
-              <th>CTY</th>
+          <thead style="position:sticky;top:0;z-index:2">
+            <tr id="standingsThead">
+              <th class="lft" style="width:22px;cursor:pointer" data-label="RK" onclick="sortStandings('rk')">RK</th>
+              <th class="lft" style="min-width:160px;cursor:pointer" data-label="PLAYER" onclick="sortStandings('name')">PLAYER</th>
+              <th style="cursor:pointer" data-label="CTY" onclick="sortStandings('cty')">CTY</th>
               <th>EVT</th>
-              <th>W</th>
+              <th style="cursor:pointer" data-label="W" onclick="sortStandings('w')">W</th>
               <th>T5</th>
-              <th>T10</th>
-              <th class="sorted">FEDEX PTS</th>
-              <th>CUTS</th>
-              <th>AVG SCR</th>
-              <th>SG TOT</th>
-              <th>SG APR</th>
-              <th>SG PUTT</th>
-              <th>SG OTT</th>
-              <th>EARNINGS</th>
-              <th>WIN%</th>
+              <th style="cursor:pointer" data-label="T10" onclick="sortStandings('t10')">T10</th>
+              <th class="sorted" style="cursor:pointer" data-label="FEDEX PTS" onclick="sortStandings('fedex')">FEDEX PTS ▼</th>
+              <th style="cursor:pointer" data-label="CUTS" onclick="sortStandings('cuts')">CUTS</th>
+              <th style="cursor:pointer" data-label="AVG SCR" onclick="sortStandings('avg')">AVG SCR</th>
+              <th style="cursor:pointer" data-label="SG TOT" onclick="sortStandings('sgt')">SG TOT</th>
+              <th style="cursor:pointer" data-label="SG APR" onclick="sortStandings('sga')">SG APR</th>
+              <th style="cursor:pointer" data-label="SG PUTT" onclick="sortStandings('sgp')">SG PUTT</th>
+              <th style="cursor:pointer" data-label="SG OTT" onclick="sortStandings('sgo')">SG OTT</th>
+              <th style="cursor:pointer" data-label="EARNINGS" onclick="sortStandings('earn')">EARNINGS</th>
+              <th style="cursor:pointer" data-label="WIN%" onclick="sortStandings('win')">WIN%</th>
             </tr>
           </thead>
           <tbody id="standingsBody"></tbody>
@@ -1643,6 +1643,101 @@ const BAR_COLORS = ['#C9A84C','#C9A84C','#b89640','#2A7A5A','#2A7A5A','#2A7A5A',
 // ── GLOBAL PLAYER DATA ────────────────────────────────────────────────
 let ALL_PLAYERS = [];
 let _sortKey    = 'rank';
+let STANDINGS_PLAYERS  = [];
+let standingsSortCol   = 'fedex';
+let standingsSortDir   = -1; // -1 = desc, 1 = asc
+
+function sortStandings(col) {
+  if (standingsSortCol === col) {
+    standingsSortDir *= -1;
+  } else {
+    standingsSortCol = col;
+    standingsSortDir = (col === 'rk' || col === 'avg') ? 1 : -1;
+  }
+  renderStandings();
+}
+
+function renderStandings() {
+  const col = standingsSortCol, dir = standingsSortDir;
+  const sorted = [...STANDINGS_PLAYERS].sort((a, b) => {
+    const rka = parseInt(a['FedEx Cup Rank']) || 999;
+    const rkb = parseInt(b['FedEx Cup Rank']) || 999;
+    let va, vb;
+    switch (col) {
+      case 'rk':   va = rka; vb = rkb; break;
+      case 'name': { const na = (a['Player Name']||'').toLowerCase(), nb = (b['Player Name']||'').toLowerCase(); return dir*(na<nb?-1:na>nb?1:0); }
+      case 'cty':  { const ca = (a['Country Code']||'').toLowerCase(), cb = (b['Country Code']||'').toLowerCase(); return dir*(ca<cb?-1:ca>cb?1:0); }
+      case 'w':    va = parseFloat(a['Season Wins'])||0;              vb = parseFloat(b['Season Wins'])||0;              break;
+      case 't10':  va = parseFloat(a['Top 10s'])||0;                  vb = parseFloat(b['Top 10s'])||0;                  break;
+      case 'fedex':va = Math.max(100, 3000-(rka-1)*95);               vb = Math.max(100, 3000-(rkb-1)*95);               break;
+      case 'cuts': va = parseFloat(a['Cuts Made'])||0;                vb = parseFloat(b['Cuts Made'])||0;                break;
+      case 'avg':  va = parseFloat(a['Scoring Avg'])||99;             vb = parseFloat(b['Scoring Avg'])||99;             break;
+      case 'sgt':  va = parseFloat(a['SG: Total'])||-99;              vb = parseFloat(b['SG: Total'])||-99;              break;
+      case 'sga':  va = parseFloat(a['SG: Approach'])||-99;           vb = parseFloat(b['SG: Approach'])||-99;           break;
+      case 'sgp':  va = parseFloat(a['SG: Putting'])||-99;            vb = parseFloat(b['SG: Putting'])||-99;            break;
+      case 'sgo':  va = parseFloat(a['SG: Off the Tee'])||-99;        vb = parseFloat(b['SG: Off the Tee'])||-99;        break;
+      case 'earn': va = parseFloat(a['Career Earnings ($)'])||0;      vb = parseFloat(b['Career Earnings ($)'])||0;      break;
+      case 'win':  va = Math.max(0.5, 30*Math.exp(-0.2*(rka-1)));     vb = Math.max(0.5, 30*Math.exp(-0.2*(rkb-1)));     break;
+      default:     va = rka; vb = rkb;
+    }
+    return dir * (va - vb);
+  });
+
+  // Update header indicators
+  const ths = document.querySelectorAll('#standingsThead th');
+  ths.forEach(th => {
+    th.classList.remove('sorted');
+    if (th.dataset.label) th.textContent = th.dataset.label;
+  });
+  const colIdx = {rk:0,name:1,cty:2,w:4,t10:6,fedex:7,cuts:8,avg:9,sgt:10,sga:11,sgp:12,sgo:13,earn:14,win:15};
+  const idx = colIdx[col];
+  if (idx !== undefined && ths[idx]) {
+    ths[idx].classList.add('sorted');
+    ths[idx].textContent = (ths[idx].dataset.label || '') + (dir === -1 ? ' ▼' : ' ▲');
+  }
+
+  document.getElementById('standingsBody').innerHTML = sorted.map((p, i) => {
+    const rk   = parseInt(p['FedEx Cup Rank']) || (i + 1);
+    const cty  = p['Country Code'] || '';
+    const w    = fmtNum(p['Season Wins']);
+    const t10  = fmtNum(p['Top 10s']);
+    const pts  = Math.max(100, 3000 - (rk - 1) * 95);
+    const cuts = fmtNum(p['Cuts Made']);
+    const avg  = fmtNum(p['Scoring Avg'], 1);
+    const sgt  = fmtSG(p['SG: Total']), sga = fmtSG(p['SG: Approach']);
+    const sgp  = fmtSG(p['SG: Putting']), sgo = fmtSG(p['SG: Off the Tee']);
+    const earn = fmtEarn(p['Career Earnings ($)']);
+    const win  = Math.max(0.5, 30 * Math.exp(-0.2 * (rk - 1))).toFixed(1);
+    return `<tr>
+      <td class="rk">${rk}</td>
+      <td class="lft" style="white-space:nowrap">
+        <div style="display:flex;align-items:center;gap:5px">
+          <span style="background:var(--bg-hover);color:#C9A84C;font-size:11px;font-weight:500;padding:1px 4px;border-radius:2px;min-width:28px;text-align:center;letter-spacing:.04em;font-family:'DM Mono',monospace">${cty}</span>
+          <span style="font-weight:500;color:var(--text);font-size:11px">${p['Player Name']}</span>
+        </div>
+      </td>
+      <td class="mono" style="color:var(--text-sec)">${cty}</td>
+      <td class="mono">—</td>
+      <td class="bold">${w}</td>
+      <td>—</td>
+      <td>${t10}</td>
+      <td class="acc">${pts.toLocaleString()}</td>
+      <td>${cuts}</td>
+      <td class="mono">${avg}</td>
+      <td class="${sgCls(sgt)}">${sgt}</td>
+      <td class="mono" style="color:var(--text-sec)">${sga}</td>
+      <td class="mono" style="color:var(--text-sec)">${sgp}</td>
+      <td class="mono" style="color:var(--text-sec)">${sgo}</td>
+      <td class="mono" style="color:var(--text-sec)">${earn}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px;justify-content:center">
+          <div class="odds-bg"><div class="odds-fill" style="width:${win}%"></div></div>
+          <span style="font-size:12px;font-weight:600;color:${parseFloat(win)>20?'#4ade80':parseFloat(win)>10?'#C9A84C':'rgba(245,240,232,.5)'};min-width:34px;font-family:'DM Mono',monospace">${win}%</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
 let pcPlayerList  = [];
 let pcPlayerIndex = 0;
 let COURSE_FIT_DATA    = [];
@@ -2368,47 +2463,8 @@ async function loadSheetData() {
     const bySG   = [...players].sort((a, b) => (parseFloat(b['SG: Total']) || 0) - (parseFloat(a['SG: Total']) || 0));
 
     // ── Standings table ────────────────────────────────────────────
-    document.getElementById('standingsBody').innerHTML = byRank.slice(0, 20).map((p, i) => {
-      const rk   = parseInt(p['FedEx Cup Rank']) || (i + 1);
-      const cty  = p['Country Code'] || '';
-      const w    = fmtNum(p['Season Wins']);
-      const t10  = fmtNum(p['Top 10s']);
-      const pts  = Math.max(100, 3000 - (rk - 1) * 95);
-      const cuts = fmtNum(p['Cuts Made']);
-      const avg  = fmtNum(p['Scoring Avg'], 1);
-      const sgt  = fmtSG(p['SG: Total']), sga = fmtSG(p['SG: Approach']);
-      const sgp  = fmtSG(p['SG: Putting']), sgo = fmtSG(p['SG: Off the Tee']);
-      const earn = fmtEarn(p['Career Earnings ($)']);
-      const win  = Math.max(0.5, 30 * Math.exp(-0.2 * (rk - 1))).toFixed(1);
-      return `<tr>
-        <td class="rk">${rk}</td>
-        <td class="lft" style="white-space:nowrap">
-          <div style="display:flex;align-items:center;gap:5px">
-            <span style="background:var(--bg-hover);color:#C9A84C;font-size:11px;font-weight:500;padding:1px 4px;border-radius:2px;min-width:28px;text-align:center;letter-spacing:.04em;font-family:'DM Mono',monospace">${cty}</span>
-            <span style="font-weight:500;color:var(--text);font-size:11px">${p['Player Name']}</span>
-          </div>
-        </td>
-        <td class="mono" style="color:var(--text-sec)">${cty}</td>
-        <td class="mono">—</td>
-        <td class="bold">${w}</td>
-        <td>—</td>
-        <td>${t10}</td>
-        <td class="acc">${pts.toLocaleString()}</td>
-        <td>${cuts}</td>
-        <td class="mono">${avg}</td>
-        <td class="${sgCls(sgt)}">${sgt}</td>
-        <td class="mono" style="color:var(--text-sec)">${sga}</td>
-        <td class="mono" style="color:var(--text-sec)">${sgp}</td>
-        <td class="mono" style="color:var(--text-sec)">${sgo}</td>
-        <td class="mono" style="color:var(--text-sec)">${earn}</td>
-        <td>
-          <div style="display:flex;align-items:center;gap:4px;justify-content:center">
-            <div class="odds-bg"><div class="odds-fill" style="width:${win}%"></div></div>
-            <span style="font-size:12px;font-weight:600;color:${parseFloat(win)>20?'#4ade80':parseFloat(win)>10?'#C9A84C':'rgba(245,240,232,.5)'};min-width:34px;font-family:'DM Mono',monospace">${win}%</span>
-          </div>
-        </td>
-      </tr>`;
-    }).join('');
+    STANDINGS_PLAYERS = byRank;
+    renderStandings();
 
     // ── Leaderboard table ──────────────────────────────────────────
     renderLeaderboard();
