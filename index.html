@@ -138,18 +138,18 @@
     .nav-cta:active  { transform: scale(0.97); }
 
     /* ── LAYOUT ───────────────────────────────────────────────── */
-    .page { max-width: 1460px; margin: 0 auto; padding: 10px; }
+    .page { max-width: 1700px; margin: 0 auto; padding: 14px 28px; }
 
     /* ── CARD ─────────────────────────────────────────────────── */
     .card {
       background: var(--bg-card);
       border: 1px solid var(--border);
-      border-radius: 6px;
+      border-radius: 8px;
       overflow: hidden;
     }
     .card-head {
       background: var(--hdr-bg);
-      padding: 7px 10px;
+      padding: 9px 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -208,7 +208,7 @@
       font-weight: 500;
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      padding: 6px 8px;
+      padding: 8px 10px;
       text-align: center;
       border-bottom: 1px solid var(--border-s);
       cursor: pointer;
@@ -219,7 +219,7 @@
     .dt th:hover, .dt th.sorted { background: var(--hdr-sort); color: #C9A84C; }
     .dt th.lft { text-align: left; }
     .dt td {
-      padding: 5px 8px;
+      padding: 6px 10px;
       font-size: 12px;
       text-align: center;
       border-bottom: 1px solid var(--border);
@@ -516,7 +516,7 @@
   </div>
 
   <!-- ROW 1: Player Card + FedEx Standings -->
-  <div class="row-grid-1" style="display:grid;grid-template-columns:330px 1fr;gap:10px;margin-bottom:10px">
+  <div class="row-grid-1" style="display:grid;grid-template-columns:330px 1fr;gap:16px;margin-bottom:16px">
 
     <!-- PLAYER CARD -->
     <div class="card">
@@ -637,7 +637,7 @@
   </div>
 
   <!-- ROW 2: Strokes Gained Leaderboard + Field Builder -->
-  <div class="row-grid-2" style="display:grid;grid-template-columns:1fr 370px;gap:10px;margin-bottom:10px">
+  <div class="row-grid-2" style="display:grid;grid-template-columns:1fr 370px;gap:16px;margin-bottom:16px">
 
     <!-- STROKES GAINED LEADERBOARD -->
     <div class="card">
@@ -723,7 +723,7 @@
   </div>
 
   <!-- COURSE FIT RANKINGS -->
-  <div id="courseFitCard" class="card" style="margin-bottom:10px;display:none">
+  <div id="courseFitCard" class="card" style="margin-bottom:16px;display:none">
     <div class="card-head" style="flex-wrap:wrap;gap:8px">
       <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span class="card-title">Course Fit Rankings</span>
@@ -754,7 +754,7 @@
   </div>
 
   <!-- PROMO BANNER -->
-  <div class="promo-banner" style="background:linear-gradient(135deg,#0a150e 0%,#1e4a2e 100%);border:1px solid var(--border-s);border-radius:6px;padding:12px 18px;margin-bottom:10px;display:flex;align-items:center;gap:16px;overflow:hidden;position:relative">
+  <div class="promo-banner" style="background:linear-gradient(135deg,#0a150e 0%,#1e4a2e 100%);border:1px solid var(--border-s);border-radius:8px;padding:14px 20px;margin-bottom:16px;display:flex;align-items:center;gap:16px;overflow:hidden;position:relative">
     <div style="position:absolute;inset:0;background:radial-gradient(circle at 20% 50%,rgba(201,168,76,.07) 0%,transparent 60%);pointer-events:none"></div>
     <img src="logo.png" alt="LinksData Lab" style="width:56px;height:56px;object-fit:contain;flex-shrink:0;position:relative;z-index:1;opacity:.9">
     <div style="flex:1;position:relative;z-index:1">
@@ -769,7 +769,7 @@
   </div>
 
   <!-- ROW 3: Player Profile + Strokes Gained Dashboard -->
-  <div class="row-grid-3" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+  <div class="row-grid-3" style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px">
 
     <!-- PLAYER PROFILE -->
     <div class="card">
@@ -833,7 +833,7 @@
   </div>
 
   <!-- THIS WEEK ON TOUR -->
-  <div id="thisWeekCard" class="card" style="margin-bottom:10px;display:none">
+  <div id="thisWeekCard" class="card" style="margin-bottom:16px;display:none">
     <div class="card-head">
       <span class="card-title">This Week on Tour</span>
       <span id="thisWeekStatus" style="font-size:12px;font-family:'DM Mono',monospace;letter-spacing:.06em"></span>
