@@ -3184,6 +3184,7 @@ async function loadCourseFitData() {
 
     _syncCourseFitToThisWeek();
     _buildCourseFitMap(COURSE_FIT_ACTIVE);
+    renderCourseFitCard();
   } catch(e) {
     console.error('Course Fit CSV failed:', e);
   }
