@@ -1,3 +1,4 @@
 temporary screenshots/
 node_modules/
 *.docx
+.env

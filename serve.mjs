@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import http from 'http';
 import https from 'https';
 import fs from 'fs';
@@ -6,7 +7,7 @@ import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const PORT = 3000;
-const DG_KEY = '686d0eb03340ee5559d7415e8723';
+const DG_KEY = process.env.DATAGOLF_API_KEY;
 
 const MIME = {
   '.html': 'text/html',
@@ -30,29 +31,59 @@ const CORS_HEADERS = {
   'Access-Control-Allow-Methods': 'GET',
 };
 
+// ── In-memory cache ───────────────────────────────────────────────────
+const _cache = {};
+
+function getCached(key, ttlMs, fetchFn) {
+  const now = Date.now();
+  if (_cache[key] && (now - _cache[key].ts) < ttlMs) {
+    return Promise.resolve(_cache[key].data);
+  }
+  return fetchFn().then(data => {
+    _cache[key] = { data, ts: now };
+    return data;
+  });
+}
+
+function dgFetch(urlPath) {
+  return new Promise((resolve, reject) => {
+    const url = `https://feeds.datagolf.com${urlPath}&key=${DG_KEY}`;
+    https.get(url, res => {
+      let body = '';
+      res.on('data', chunk => body += chunk);
+      res.on('end', () => resolve(body));
+    }).on('error', reject);
+  });
+}
+
+function sendJSON(res, statusCode, body) {
+  res.writeHead(statusCode, { 'Content-Type': 'application/json', ...CORS_HEADERS });
+  res.end(typeof body === 'string' ? body : JSON.stringify(body));
+}
+
+// ── Server ────────────────────────────────────────────────────────────
 const server = http.createServer((req, res) => {
   const parsed  = new URL(req.url, `http://localhost:${PORT}`);
   const urlPath = parsed.pathname;
 
-  // ── DataGolf proxy ───────────────────────────────────────────────
-  if (urlPath === '/api/schedule') {
-    const tour = parsed.searchParams.get('tour') || 'pga';
-    const dgUrl = `https://feeds.datagolf.com/get-schedule?tour=${encodeURIComponent(tour)}&file_format=json&key=${DG_KEY}`;
-    https.get(dgUrl, (dgRes) => {
-      let body = '';
-      dgRes.on('data', chunk => body += chunk);
-      dgRes.on('end', () => {
-        res.writeHead(dgRes.statusCode, { 'Content-Type': 'application/json', ...CORS_HEADERS });
-        res.end(body);
-      });
-    }).on('error', err => {
-      res.writeHead(502, { 'Content-Type': 'application/json', ...CORS_HEADERS });
-      res.end(JSON.stringify({ error: err.message }));
-    });
+  // OPTIONS preflight
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, CORS_HEADERS);
+    res.end();
     return;
   }
 
-  // ── Static files ─────────────────────────────────────────────────
+  // ── /api/schedule — tour schedule (cached 5 min) ──────────────────
+  if (urlPath === '/api/schedule') {
+    const tour = parsed.searchParams.get('tour') || 'pga';
+    getCached(`schedule-${tour}`, 5 * 60 * 1000,
+      () => dgFetch(`/get-schedule?tour=${encodeURIComponent(tour)}&file_format=json`))
+      .then(body => sendJSON(res, 200, body))
+      .catch(err => sendJSON(res, 502, { error: err.message }));
+    return;
+  }
+
+  // ── Static files ──────────────────────────────────────────────────
   const filePath = path.join(__dirname, urlPath === '/' ? '/index.html' : urlPath);
   const ext = path.extname(filePath).toLowerCase();
   const contentType = MIME[ext] || 'application/octet-stream';
