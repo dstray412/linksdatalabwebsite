@@ -1,5 +1,22 @@
 # CLAUDE.md — Frontend Website Rules
 
+## Architecture: WAT Framework
+This project follows the **Workflows/Agents/Tools** pattern:
+- **Workflows** (`workflows/`) — Markdown SOPs defining what to do and how
+- Before starting any task, check if a relevant workflow exists in `workflows/`
+- Available workflows: `deploy.md`, `screenshot-regression.md`
+
+## Sister Project: LinksData Lab
+- Location: `c:\Users\Owner\OneDrive\Desktop\LinksData Lab\`
+- Data flows FROM LinksData Lab (Python) TO this website (JS)
+- Google Sheet "LinksData Lab" is the bridge — this site reads published CSV URLs
+- Data pipeline: DataGolf/ESPN APIs → Python scripts → Google Sheets → this site (CSV fetch)
+
+## Secrets
+- **NEVER** hardcode API keys in any file
+- All secrets live in `.env` (gitignored)
+- `serve.mjs` reads from `process.env` via `dotenv` package
+
 ## Always Do First
 - **Invoke the `frontend-design` skill** before writing any frontend code, every session, no exceptions.
 

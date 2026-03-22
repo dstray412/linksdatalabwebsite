@@ -4,7 +4,9 @@
 // Set a time-driven trigger (e.g. daily at midnight) to keep it fresh.
 // ─────────────────────────────────────────────────────────────────────
 
-const DG_API_KEY = '686d0eb03340ee5559d7415e8723';
+// Store the key in Script Properties (File > Project Properties > Script Properties)
+// Key name: DATAGOLF_API_KEY
+const DG_API_KEY = PropertiesService.getScriptProperties().getProperty('DATAGOLF_API_KEY');
 const TOURS      = ['pga', 'euro', 'kft', 'liv'];
 const SHEET_NAME = '2026_schedule';
 
